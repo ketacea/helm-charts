@@ -1,0 +1,68 @@
+version: "3"
+
+services:
+  mysql-svc:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ketaops1234
+    command: "--max-allowed-packet=1024000000 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
+    volumes:
+      - ${MYSQL_DATA_PATH}:/var/lib/mysql
+
+  ketadb:
+    image: ${REPOSITORY}/${KETADB_IMAGE_IMAGE}:${KETADB_IMAGE_TAG}
+    restart: always
+    volumes:
+      - ${KETADB_DATA_PATH}:/usr/share/keta/var
+    environment:
+      node.name: ketadb
+      keta.database.mysql.url: mysql-svc:3306
+      keta.database.mysql.database: phoenix
+      keta.database.mysql.user: root
+      keta.database.mysql.password: ketaops1234
+      http.max_content_length: "500mb"
+      network.host: 0.0.0.0
+      keta.scheduler.master.assign.interval: "3"
+      keta.scheduler.worker.fetchtasks.interval: "4"
+      keta.dc.data.trans.path: /api/v1/data
+      keta.cache.expiry.all: 60
+      keta.cache.expiry.auth: 60
+      keta.memory.query.limit.mb: 2048
+      keta.csrf.check.enable: "true"
+      keta.events.expire.interval.seconds: 60
+      keta.environment: local
+
+      keta.auth_disabled.internal_api: "false"
+      keta.app.home: /usr/share/keta/var/app
+      cluster.routing.allocation.disk.watermark.flood_stage: 95%
+      cluster.routing.allocation.disk.watermark.high: 90%
+      KETA_JAVA_OPTS: "${JVM_OPTIONS}"
+      cluster.routing.allocation.disk.watermark.low: 85%
+      keta.transport.dbconnect.encryption.enable: "false"
+      keta.transport.asymmetric.encryption.enable: "false"
+      keta.notice.encryption.enable: "false"
+      keta.static.file.root.path: ./lib/keta-web
+      path.data: /usr/share/keta/var/data
+      path.logs: /usr/share/keta/var/logs
+      keta.matrix.ml.node.urls: keta-ml-svc:5005
+      node.attr.tag: hot   # hot, warm, cold
+
+    ports:
+      - "${KETADB_WEB_PORT}:9200"
+      - "${KETADB_UNICAST_PORT}:9300"
+      - "${KETADB_TANSPORT_PORT}:9400"
+      - "${KETADB_SEARCH_RPC_PORT}:9500"
+
+    depends_on:
+      - mysql-svc
+
+  keta-ml-svc:
+    image: ${REPOSITORY}/${KETA_ML_IMAGE_IMAGE}:${KETA_ML_IMAGE_TAG}
+    restart: always
+    volumes: 
+      - ./config/keta-ml.yml:/usr/share/keta/config/keta-ml.yml 
+    depends_on:
+      - ketadb
+    command: "keta-ml" 
+

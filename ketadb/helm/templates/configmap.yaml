@@ -1,0 +1,294 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{ .Chart.Name }}"
+    app: "{{ template "ketadb.uname" . }}"
+data:
+  keta.yml: |
+    cluster.name: ketadb #集群名
+    http.port: 9200
+    transport.tcp.port: 9300
+    keta.app.package.market: lib/keta-apps # 应用市场
+    keta.dc.server.shell.path: lib/keta-agent/shell # agent 安装脚本
+    keta.dc.agent.package: lib/keta-agent/lib
+    keta.alert.attachment.root: var/alert/attachment # 告警附件
+    keta.alert.template.root: var/alert/template # 告警模版
+    keta.lookup.home: var/lookup # 查找表
+    keta.matrix.cache.path: var/cache # search2计算缓存
+    keta.job.cache.disk.path: var/cache # search1计算缓存
+    path.logs: /usr/share/keta/var/log # 日志
+    http.max_content_length: "500mb"
+    network.host: 0.0.0.0
+    keta.database.mysql.url: mysql-svc:3306
+    keta.database.mysql.database: phoenix
+    keta.database.mysql.user: root
+    keta.database.mysql.password: "654321"
+    keta.scheduler.master.assign.interval: "3"
+    keta.scheduler.worker.fetchtasks.interval: "4"
+    keta.dc.data.trans.path: /api/v1/data
+    keta.cache.expiry.all: 60
+    keta.cache.expiry.auth: 60
+    keta.memory.query.limit.mb: 2048
+    keta.csrf.check.enable: true
+    keta.events.expire.interval.seconds: 60
+    keta.environment: local
+    keta.auth_disabled.internal_api: false
+    keta.app.home: /usr/share/keta/var/app
+    cluster.routing.allocation.disk.watermark.flood_stage: 95%
+    cluster.routing.allocation.disk.watermark.high: 90%
+    cluster.routing.allocation.disk.watermark.low: 85%
+    keta.transport.dbconnect.encryption.enable: false
+    keta.transport.asymmetric.encryption.enable: false
+    keta.notice.encryption.enable: false
+    keta.static.file.root.path: ./lib/keta-web
+    path.data: /usr/share/keta/var/data
+    keta.matrix.ml.node.urls: keta-ml:5005
+    node.attr.tag: hot   # hot, warm, cold
+    KETA_JAVA_OPTS: "-Xmx4g -Xms4g"
+
+
+  jvm.options: |
+    ## JVM configuration
+
+    ################################################################
+    ## IMPORTANT: JVM heap size
+    ################################################################
+    ##
+    ## You should always set the min and max JVM heap
+    ## size to the same value. For example, to set
+    ## the heap to 4 GB, set:
+    ##
+    ## -Xms4g
+    ## -Xmx4g
+    ##
+    ################################################################
+
+    # Xms represents the initial size of total heap space
+    # Xmx represents the maximum size of total heap space
+
+    -Xms4g
+    -Xmx4g
+
+    ################################################################
+    ## Expert settings
+    ################################################################
+    ##
+    ## All settings below this section are considered
+    ## expert settings. Don't tamper with them unless
+    ## you understand what you are doing
+    ##
+    ################################################################
+
+    ## GC configuration
+    # -XX:+UseConcMarkSweepGC
+    # -XX:CMSInitiatingOccupancyFraction=75
+    # -XX:+UseCMSInitiatingOccupancyOnly
+    -XX:+UseG1GC
+
+    ## optimizations
+
+    # pre-touch memory pages used by the JVM during initialization
+    -XX:+AlwaysPreTouch
+
+    ## basic
+
+    # force the server VM (remove on 32-bit client JVMs)
+    -server
+
+    # explicitly set the stack size (reduce to 320k on 32-bit client JVMs)
+    -Xss1m
+
+    # set to headless, just in case
+    -Djava.awt.headless=true
+
+    # ensure UTF-8 encoding by default (e.g. filenames)
+    -Dsun.jnu.encoding=UTF-8
+    -Dfile.encoding=UTF-8
+
+    # use our provided JNA always versus the system one
+    -Djna.nosys=true
+
+    # use old-style file permissions on JDK9
+    -Djdk.io.permissionsUseCanonicalPath=true
+
+    # flags to configure Netty
+    -Dio.netty.noUnsafe=false
+    -Dio.netty.noKeySetOptimization=true
+    -Dio.netty.recycler.maxCapacityPerThread=0
+    -Dio.netty.tryReflectionSetAccessible=true
+    -Dio.netty.noPreferDirect=false
+    -Dio.netty.maxDirectMemory=512m
+
+    # log4j 2
+    -Dlog4j.shutdownHookEnabled=false
+    -Dlog4j2.disable.jmx=true
+    -Dlog4j.skipJansi=true
+
+    -Dsun.net.maxDatagramSockets=512
+
+    ## heap dumps
+
+    # generate a heap dump when an allocation from the Java heap fails
+    # heap dumps are created in the working directory of the JVM
+    -XX:+HeapDumpOnOutOfMemoryError
+
+    # specify an alternative path for heap dumps
+    # ensure the directory exists and has sufficient space
+    #-XX:HeapDumpPath=${heap.dump.path}
+
+    ## GC logging
+
+    #-XX:+PrintGCDetails
+    #-XX:+PrintGCTimeStamps
+    #-XX:+PrintGCDateStamps
+    #-XX:+PrintClassHistogram
+    #-XX:+PrintTenuringDistribution
+    #-XX:+PrintGCApplicationStoppedTime
+
+    # log GC status to a file with time stamps
+    # ensure the directory exists
+    #-Xloggc:${loggc}
+
+  log4j2.properties: |
+    status = error
+
+    # log action execution errors for easier debugging
+    logger.action.name = org.elasticsearch.action
+    logger.action.level = debug
+
+    appender.console.type = Console
+    appender.console.name = console
+    appender.console.layout.type = PatternLayout
+    appender.console.layout.pattern = [%d{ISO8601}][%-5p][%-25c{1.}] [%node_name]%marker %m%n
+
+    appender.rolling.type = RollingFile
+    appender.rolling.name = rolling
+    appender.rolling.fileName = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}.log
+    appender.rolling.layout.type = PatternLayout
+    appender.rolling.layout.pattern = [%d{ISO8601}][%-5p][%-25c{1.}] [%node_name]%marker %.-10000m%n
+    appender.rolling.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}-%d{yyyy-MM-dd}-%i.log.gz
+    appender.rolling.policies.type = Policies
+    appender.rolling.policies.time.type = TimeBasedTriggeringPolicy
+    appender.rolling.policies.time.interval = 1
+    appender.rolling.policies.time.modulate = true
+    appender.rolling.policies.size.type = SizeBasedTriggeringPolicy
+    appender.rolling.policies.size.size = 128MB
+    appender.rolling.strategy.type = DefaultRolloverStrategy
+    appender.rolling.strategy.fileIndex = nomax
+    appender.rolling.strategy.action.type = Delete
+    appender.rolling.strategy.action.basepath = ${sys:es.logs.base_path}
+    appender.rolling.strategy.action.condition.type = IfFileName
+    appender.rolling.strategy.action.condition.glob = ${sys:es.logs.cluster_name}-*
+    # keep the most recent 2GB
+    appender.rolling.strategy.action.condition.nested_condition.type = IfAny
+    appender.rolling.strategy.action.condition.nested_condition.fileSize.type = IfAccumulatedFileSize
+    appender.rolling.strategy.action.condition.nested_condition.fileSize.exceeds = 2GB
+    # delete files 7 days older
+    appender.rolling.strategy.action.condition.nested_condition.lastMod.type = IfLastModified
+    appender.rolling.strategy.action.condition.nested_condition.lastMod.age = 7D
+
+    rootLogger.level = info
+    rootLogger.appenderRef.console.ref = console
+    rootLogger.appenderRef.rolling.ref = rolling
+
+    appender.deprecation_rolling.type = RollingFile
+    appender.deprecation_rolling.name = deprecation_rolling
+    appender.deprecation_rolling.fileName = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}_deprecation.log
+    appender.deprecation_rolling.layout.type = PatternLayout
+    appender.deprecation_rolling.layout.pattern = [%d{ISO8601}][%-5p][%-25c{1.}] [%node_name]%marker %.-10000m%n
+    appender.deprecation_rolling.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}_deprecation-%i.log.gz
+    appender.deprecation_rolling.policies.type = Policies
+    appender.deprecation_rolling.policies.size.type = SizeBasedTriggeringPolicy
+    appender.deprecation_rolling.policies.size.size = 1GB
+    appender.deprecation_rolling.strategy.type = DefaultRolloverStrategy
+    appender.deprecation_rolling.strategy.max = 4
+
+    logger.deprecation.name = org.elasticsearch.deprecation
+    logger.deprecation.level = warn
+    logger.deprecation.appenderRef.deprecation_rolling.ref = deprecation_rolling
+    logger.deprecation.additivity = false
+
+    appender.index_search_slowlog_rolling.type = RollingFile
+    appender.index_search_slowlog_rolling.name = index_search_slowlog_rolling
+    appender.index_search_slowlog_rolling.fileName = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}_index_search_slowlog.log
+    appender.index_search_slowlog_rolling.layout.type = PatternLayout
+    appender.index_search_slowlog_rolling.layout.pattern = [%d{ISO8601}][%-5p][%-25c] [%node_name]%marker %.-10000m%n
+    appender.index_search_slowlog_rolling.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}_index_search_slowlog-%d{yyyy-MM-dd}.log
+    appender.index_search_slowlog_rolling.policies.type = Policies
+    appender.index_search_slowlog_rolling.policies.time.type = TimeBasedTriggeringPolicy
+    appender.index_search_slowlog_rolling.policies.time.interval = 1
+    appender.index_search_slowlog_rolling.policies.time.modulate = true
+
+    logger.index_search_slowlog_rolling.name = index.search.slowlog
+    logger.index_search_slowlog_rolling.level = trace
+    logger.index_search_slowlog_rolling.appenderRef.index_search_slowlog_rolling.ref = index_search_slowlog_rolling
+    logger.index_search_slowlog_rolling.additivity = false
+
+    appender.index_indexing_slowlog_rolling.type = RollingFile
+    appender.index_indexing_slowlog_rolling.name = index_indexing_slowlog_rolling
+    appender.index_indexing_slowlog_rolling.fileName = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}_index_indexing_slowlog.log
+    appender.index_indexing_slowlog_rolling.layout.type = PatternLayout
+    appender.index_indexing_slowlog_rolling.layout.pattern = [%d{ISO8601}][%-5p][%-25c] [%node_name]%marker %.-10000m%n
+    appender.index_indexing_slowlog_rolling.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}_index_indexing_slowlog-%d{yyyy-MM-dd}.log
+    appender.index_indexing_slowlog_rolling.policies.type = Policies
+    appender.index_indexing_slowlog_rolling.policies.time.type = TimeBasedTriggeringPolicy
+    appender.index_indexing_slowlog_rolling.policies.time.interval = 1
+    appender.index_indexing_slowlog_rolling.policies.time.modulate = true
+
+    logger.index_indexing_slowlog.name = index.indexing.slowlog.index
+    logger.index_indexing_slowlog.level = trace
+    logger.index_indexing_slowlog.appenderRef.index_indexing_slowlog_rolling.ref = index_indexing_slowlog_rolling
+    logger.index_indexing_slowlog.additivity = false
+
+  config.json: |
+    {
+      "copyrightName": "",
+      "company": {
+        "companyName": "",
+        "loginLogo": "",
+        "platformName": "",
+        "wholeLogo": "",
+        "favicon": ""
+      },
+      "agent": {
+        "enable": false
+      },
+      "license": {
+        "enable": true
+      },
+      "system": {
+        "enable": false
+      },
+      "collection": {
+        "enable": true
+      },
+      "intl": {
+        "enable": true
+      },
+      "search": {
+        "collectSize": 10000,
+        "searchInterval": 1000
+      },
+      "document": {
+        "show": true,
+        "link": "/docs/"
+      },
+      "startPage": {
+        "disabledButtonStyle": "disabled"
+      },
+      "sourcetypeAdvance": {
+        "enable": false
+      },
+      "sidebars": [],
+      "interactiveSearch": {
+        "forbiddenSearch2": false
+      },
+      "smartElfAddress": "",
+      "copyright":true,
+      "recordNumber": "粤ICP备2022101179号-1",
+      "recordNumberLink": "https://beian.miit.gov.cn"
+    }

@@ -1,0 +1,52 @@
+{{- if .Values.ketadb.ingress.enabled -}}
+{{- $fullName := .Release.Name -}}
+{{- $namespace := .Release.Namespace -}}
+{{- $monitorPort := .Values.ketadb.service.ports.monitor -}}
+{{- $servicePort := .Values.ketadb.service.ports.http -}}
+{{- $ingressPath := .Values.ketadb.ingress.path -}}
+{{- $apiIsStable := eq (include "ketadb.ingress.isStable" .) "true" -}}
+{{- $ingressSupportsPathType := eq (include "ketadb.ingress.supportsPathType" .) "true" -}}
+apiVersion: {{ template "ketadb.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-monitor
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+{{- with .Values.ketadb.ingress.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ketadb.ingress.tls }}
+  tls:
+  {{- range .Values.ketadb.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ketadb.ingress.hostsSuffix }}
+    - host: {{ . }}
+      http:
+        paths:
+          - path: {{ $ingressPath }}
+            {{- if $ingressSupportsPathType }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- if $apiIsStable }}
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $servicePort }}
+              {{- else }}
+              serviceName: {{ $fullName }}
+              servicePort: {{ $servicePort }}
+              {{- end }}
+  {{- end }}
+{{- end }}

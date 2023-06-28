@@ -1,0 +1,39 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{ .Chart.Name }}"
+    app: "{{ template "ketadb.uname" . }}"
+{{- if .Values.ketadb.service.labels }}
+{{ toYaml .Values.ketadb.service.labels | indent 4}}
+{{- end }}
+  annotations:
+{{ toYaml .Values.ketadb.service.annotations | indent 4 }}
+spec:
+  type: {{ .Values.ketadb.service.type }}
+  selector:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{ .Chart.Name }}"
+    app: "{{ .Release.Name }}"
+  ports:
+  {{- range $key,$value := .Values.ketadb.service.ports }}
+  - name: {{ $key }}
+    protocol: TCP
+    port: {{ $value }}
+  {{- end }}
+
+{{- if .Values.ketadb.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.ketadb.service.loadBalancerIP }}
+{{- end }}
+{{- with .Values.ketadb.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+{{ toYaml . | indent 4 }}
+{{- end }}
+{{- if .Values.ketadb.service.extraPorts }}
+{{ toYaml .Values.ketadb.service.extraPorts | indent 2}}
+{{- end }}
