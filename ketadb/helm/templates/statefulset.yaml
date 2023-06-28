@@ -9,7 +9,7 @@ metadata:
     release: {{ .Release.Name | quote }}
     chart: "{{ .Chart.Name }}"
     app: "{{ .Release.Name }}"
-    {{- range $key, $value := .Values.ketadb.pod.labels }}
+    {{- range $key, $value := .Values.pod.labels }}
     {{ $key }}: {{ $value | quote }}
     {{- end }}
 spec:
@@ -17,20 +17,20 @@ spec:
   selector:
     matchLabels:
       app: "{{ .Release.Name }}"
-  replicas: {{ .Values.ketadb.replicas }}
-  podManagementPolicy: {{ .Values.ketadb.podManagementPolicy }}
+  replicas: {{ .Values.replicas }}
+  podManagementPolicy: {{ .Values.podManagementPolicy }}
   updateStrategy:
-    type: {{ .Values.ketadb.updateStrategy }}
-  {{- if .Values.ketadb.persistence.enabled }}
+    type: {{ .Values.updateStrategy }}
+  {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
   - metadata:
       name: {{ .Release.Name }}
-    {{- with .Values.ketadb.persistence.annotations  }}
+    {{- with .Values.persistence.annotations  }}
       annotations:
     {{ toYaml . | nindent 8 }}
     {{- end }}
     spec:
-    {{ toYaml .Values.ketadb.volumeClaimTemplate | nindent 8 }}
+    {{ toYaml .Values.volumeClaimTemplate | nindent 8 }}
   {{- end }}
   template:
     metadata:
@@ -40,77 +40,99 @@ spec:
         release: {{ .Release.Name | quote }}
         chart: "{{ .Chart.Name }}"
         app: "{{ .Release.Name }}"
-        {{- range $key, $value := .Values.ketadb.pod.labels }}
+        {{- range $key, $value := .Values.pod.labels }}
         {{ $key }}: {{ $value | quote }}
         {{- end }}
       annotations:
-        {{- range $key, $value := .Values.ketadb.pod.annotations }}
+        {{- range $key, $value := .Values.pod.annotations }}
         {{ $key }}: {{ $value | quote }}
         {{- end }}
     spec:
       securityContext:
-        {{ toYaml .Values.ketadb.podSecurityContext | nindent  8 }}
-      {{- with .Values.ketadb.tolerations }}
+        {{ toYaml .Values.podSecurityContext | nindent  8 }}
+      {{- with .Values.tolerations }}
       tolerations:
       {{ toYaml . | nindent  6 }}
       {{- end }}
-      {{- with .Values.ketadb.nodeSelector }}
+      {{- with .Values.nodeSelector }}
       nodeSelector:
       {{ toYaml . | nindent  8 }}
       {{- end }}
-      {{- if or (eq .Values.ketadb.antiAffinity "hard") (eq .Values.ketadb.antiAffinity "soft") .Values.ketadb.nodeAffinity }}
-      {{- if .Values.ketadb.priorityClassName }}
-      priorityClassName: {{ .Values.ketadb.priorityClassName }}
+      {{- if or (eq .Values.antiAffinity "hard") (eq .Values.antiAffinity "soft") .Values.nodeAffinity }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}
       affinity:
       {{- end }}
-
-      {{- with .Values.ketadb.nodeAffinity }}
-        nodeAffinity:
-        {{ toYaml . | nindent 10 }}
+      {{- if eq .Values.antiAffinity "hard" }}
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - "{{ template "ketadb.uname" .}}"
+            topologyKey: {{ .Values.antiAffinityTopologyKey }}
+      {{- else if eq .Values.antiAffinity "soft" }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: {{ .Values.antiAffinityTopologyKey }}
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - "{{ template "ketadb.uname" . }}"
       {{- end }}
-      terminationGracePeriodSeconds: {{ .Values.ketadb.terminationGracePeriod }}
+      {{- with .Values.nodeAffinity }}
+        nodeAffinity:
+        {{ toYaml . | indent 10 }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriod }}
       volumes:
         - name: ketaconfig
           configMap:
             name: {{ .Release.Name }}-config
       imagePullSecrets:
       initContainers:
-      {{- if .Values.ketadb.sysctlInitContainer.enabled }}
+      {{- if .Values.sysctlInitContainer.enabled }}
       - name: configure-sysctl
         securityContext:
           runAsUser: 0
           privileged: true
-        image: "{{ .Values.ketadb.image.repository }}:{{ .Values.ketadb.image.tag }}"
-        imagePullPolicy: "{{ .Values.ketadb.image.PullPolicy }}"
-        command: ["sysctl", "-w", "vm.max_map_count={{ .Values.ketadb.sysctlInitContainer.sysctlVmMaxMapCount }}"]
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: "{{ .Values.image.PullPolicy }}"
+        command: ["sysctl", "-w", "vm.max_map_count={{ .Values.sysctlInitContainer.sysctlVmMaxMapCount }}"]
         resources:
-        {{ toYaml .Values.ketadb.sysctlInitContainer.resources | nindent 10 }}
+        {{ toYaml .Values.sysctlInitContainer.resources | nindent 10 }}
       {{- end }}
 
       containers:
       - name: "{{ template "ketadb.name" . }}"
         securityContext:
-        {{ toYaml .Values.ketadb.securityContext | nindent 10 }}
-        image: "{{ .Values.ketadb.image.repository }}:{{ .Values.ketadb.image.tag }}"
-        imagePullPolicy: "{{ .Values.ketadb.image.PullPolicy }}"
+        {{ toYaml .Values.securityContext | nindent 10 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: "{{ .Values.image.PullPolicy }}"
         readinessProbe:
           tcpSocket:
             port: 9300
-        {{ toYaml .Values.ketadb.readinessProbe | nindent 10 }}
+        {{ toYaml .Values.readinessProbe | nindent 10 }}
         livenessProbe:
           tcpSocket:
             port: 9300
-        {{ toYaml .Values.ketadb.livenessProbe | nindent 10 }}
+        {{ toYaml .Values.livenessProbe | nindent 10 }}
         ports:
-        {{- range $key,$value := .Values.ketadb.service.ports }}
+        {{- range $key,$value := .Values.service.ports }}
           - name: {{ $key }}
             containerPort: {{ $value }}
         {{- end }}
         resources:
-        {{ toYaml .Values.ketadb.resources | nindent 10 }}
+        {{ toYaml .Values.resources | nindent 10 }}
         env:
-          {{- range $key, $value := .Values.ketadb.env }}
+          {{- range $key, $value := .Values.env }}
           - name: {{ $key }}
             value: {{ $value | quote }}
           {{- end }}
@@ -119,27 +141,27 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
-          {{- if eq .Values.ketadb.roles.master true }}
+          {{- if eq .Values.roles.master true }}
           - name: cluster.initial_master_nodes
             value: "{{ .Release.Name }}"
           {{- end }}
 
           - name: discovery.zen.ping.unicast.hosts
-            value: "{{ .Values.ketadb.unicast | default .Release.Name }}"
+            value: "{{ .Values.unicast | default .Release.Name }}"
           - name: cluster.name
-            value: {{ .Values.ketadb.clusterName | default "ketadb" }}
+            value: {{ .Values.clusterName | default "ketadb" }}
 
           - name: keta.license.check.interval
-            value: "{{ .Values.ketadb.licenseCheckInterval }}"
+            value: "{{ .Values.licenseCheckInterval }}"
 
           - name: node.master
-            value: "{{ .Values.ketadb.roles.master }}"
+            value: "{{ .Values.roles.master }}"
           - name: node.web
-            value: "{{ .Values.ketadb.roles.web }}"
+            value: "{{ .Values.roles.web }}"
           - name: node.data
-            value: "{{ .Values.ketadb.roles.data }}"
+            value: "{{ .Values.roles.data }}"
           - name: node.ingest
-            value: "{{ .Values.ketadb.roles.ingest }}"
+            value: "{{ .Values.roles.ingest }}"
 
           - name: POD_IP
             valueFrom:
@@ -149,35 +171,35 @@ spec:
           - name: UPGRADE_TIME
             value: {{ date "2006-01-02-150405" .Release.Time }}
           - name: keta.dc.server.url
-          {{- if .Values.ketadb.dcServerUrl }}
-            value: "{{ .Values.ketadb.dcServerUrl }}"
-          {{- else if .Values.ketadb.ingress.enabled }}
-            value: "http://{{ .Values.ketadb.ingress.hostsSuffix | first }}"
+          {{- if .Values.dcServerUrl }}
+            value: "{{ .Values.dcServerUrl }}"
+          {{- else if .Values.ingress.enabled }}
+            value: "http://{{ .Values.ingress.hostsSuffix | first }}"
           {{- else }}
             value: http://{{ .Release.Name }}:9200
           {{- end }}
 
           - name: keta.dc.heartbeat.address
-          {{- if .Values.ketadb.dcServerHeartbeats }}
-            value: "{{ .Values.ketadb.dcServerHeartbeats }}"
+          {{- if .Values.dcServerHeartbeats }}
+            value: "{{ .Values.dcServerHeartbeats }}"
           {{- else }}
             value: "{{ .Release.Name }}:9400"
           {{- end }}
 
           - name: keta.dc.data.trans.urls
-          {{- if .Values.ketadb.dcDataTransUrls }}
-            value: "{{ .Values.ketadb.dcDataTransUrls }}"
-          {{- else if .Values.ketadb.ingress.enabled }}
-            value: "http://{{ .Values.ketadb.ingress.hostsSuffix | first }}"
+          {{- if .Values.dcDataTransUrls }}
+            value: "{{ .Values.dcDataTransUrls }}"
+          {{- else if .Values.ingress.enabled }}
+            value: "http://{{ .Values.ingress.hostsSuffix | first }}"
           {{- else }}
             value: http://{{ .Release.Name }}:9200
           {{- end }}
 
           - name: keta.alert.host
-          {{- if .Values.ketadb.alertHost }}
-            value: "{{ .Values.ketadb.alertHost }}"
-          {{- else if .Values.ketadb.ingress.enabled }}
-            value: "http://{{ .Values.ketadb.ingress.hostsSuffix | first }}"
+          {{- if .Values.alertHost }}
+            value: "{{ .Values.alertHost }}"
+          {{- else if .Values.ingress.enabled }}
+            value: "http://{{ .Values.ingress.hostsSuffix | first }}"
           {{- else }}
             value: http://{{ .Release.Name }}:9200
           {{- end }}
@@ -188,12 +210,12 @@ spec:
         {{ toYaml .Values.envFrom | nindent 10 }}
         {{- end }}
         volumeMounts:
-          {{- if .Values.ketadb.persistence.enabled }}
+          {{- if .Values.persistence.enabled }}
           - name: "{{ .Release.Name }}"
             mountPath: /usr/share/keta/var
           {{- end }}
 
-          {{- range .Values.ketadb.secretMounts }}
+          {{- range .Values.secretMounts }}
           - name: {{ .name }}
             mountPath: {{ .path }}
             {{- if .subPath }}
@@ -216,24 +238,24 @@ spec:
             mountPath: /usr/share/keta/lib/keta-web/static/config.json
             subPath: config.json
 
-        {{- if .Values.ketadb.extraVolumeMounts }}
+        {{- if .Values.extraVolumeMounts }}
         # Currently some extra blocks accept strings
         # to continue with backwards compatibility this is being kept
         # whilst also allowing for yaml to be specified too.
-          {{- if eq "string" (printf "%T" .Values.ketadb.extraVolumeMounts) }}
-            {{ tpl .Values.ketadb.extraVolumeMounts . | nindent 10 }}
+          {{- if eq "string" (printf "%T" .Values.extraVolumeMounts) }}
+            {{ tpl .Values.extraVolumeMounts . | nindent 10 }}
           {{- else }}
-            {{ toYaml .Values.ketadb.extraVolumeMounts | nindent 10 }}
+            {{ toYaml .Values.extraVolumeMounts | nindent 10 }}
           {{- end }}
         {{- end }}
 
-      {{- if .Values.ketadb.extraContainers }}
+      {{- if .Values.extraContainers }}
       # Currently some extra blocks accept strings
       # to continue with backwards compatibility this is being kept
       # whilst also allowing for yaml to be specified too.
-        {{- if eq "string" (printf "%T" .Values.ketadb.extraContainers) }}
-          {{ tpl .Values.ketadb.extraContainers . | nindent 6 }}
+        {{- if eq "string" (printf "%T" .Values.extraContainers) }}
+          {{ tpl .Values.extraContainers . | nindent 6 }}
         {{- else }}
-          {{ toYaml .Values.ketadb.extraContainers | nindent 6 }}
+          {{ toYaml .Values.extraContainers | nindent 6 }}
         {{- end }}
       {{- end }}

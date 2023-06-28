@@ -48,7 +48,7 @@ data:
     path.data: /usr/share/keta/var/data
     keta.matrix.ml.node.urls: keta-ml:5005
     node.attr.tag: hot   # hot, warm, cold
-    KETA_JAVA_OPTS: "-Xmx4g -Xms4g"
+
 
 
   jvm.options: |
@@ -70,8 +70,7 @@ data:
     # Xms represents the initial size of total heap space
     # Xmx represents the maximum size of total heap space
 
-    -Xms4g
-    -Xmx4g
+    {{ .Values.KETA_JAVA_OPTS | default "-Xmx1g -Xms1g" }}
 
     ################################################################
     ## Expert settings

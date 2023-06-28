@@ -18,107 +18,86 @@ helm install --create-namespace ketadb keta-chart/ketadb -n keta
 
 ```
 
-### Check Deployment Status and Logs
-```bash
-kubectl get pod -n keta
-kubectl logs ketadb-0 -n keta
-```
-
-## Update
-### Update Helm Chart from Repository
-```bash
-helm repo update keta-chart
-```
-
-### Update ketadb
-```bash
-helm upgrade ketadb keta-chart/ketadb -n keta
-```
-
-## Configure Ingress
-```bash
-helm install ketadb keta-chart/ketadb -n keta --set ketadb.ingress.enabled=true --set ketadb.ingress.hostsSuffix[0]=ketadb.example.com
-```
 
 ## Other Parameters
 
 | Parameter Name                                 | Type     | Description                                 |
 |------------------------------------------------|----------|---------------------------------------------|
-| ketadb.clusterName                             | string   | Name of the Ketadb cluster.                  |
-| ketadb.replicas                                | integer  | Number of replicas for the Ketadb cluster.   |
-| ketadb.podManagementPolicy                     | string   | Pod management policy, set to "Parallel" here.|
-| ketadb.updateStrategy                          | string   | Update strategy, set to "RollingUpdate" here.|
-| ketadb.image.repository                        | string   | Repository for the Ketadb image.             |
-| ketadb.image.tag                               | string   | Tag for the Ketadb image.                    |
-| ketadb.image.PullPolicy                        | string   | Image pull policy.                           |
-| ketadb.pod.labels                              | object   | Labels for the Pod.                          |
-| ketadb.pod.annotations                         | object   | Annotations for the Pod.                     |
-| ketadb.service.labels                          | object   | Labels for the Service.                      |
-| ketadb.service.type                            | string   | Type of the Service, set to "ClusterIP" here.|
-| ketadb.service.nodePort                        | string   | NodePort for the Service.                    |
-| ketadb.service.annotations                     | object   | Annotations for the Service.                 |
-| ketadb.service.ports.http                      | string   | HTTP port.                                  |
-| ketadb.service.ports.transport                 | string   | Transport port.                             |
-| ketadb.service.ports.monitor                   | string   | Monitor port.                               |
-| ketadb.service.ports.heartbeat                 | string   | Heartbeat port.                             |
-| ketadb.service.ports.rpc                       | string   | RPC port.                                   |
-| ketadb.service.ports.debug                     | string   | Debug port.                                 |
-| ketadb.service.loadBalancerIP                  | string   | LoadBalancer IP.                            |
-| ketadb.service.loadBalancerSourceRanges        | array    | LoadBalancer source IP ranges.               |
-| ketadb.service.extraPorts                      | array    | Additional port configurations.              |
-| ketadb.resources.requests.cpu                  | string   | CPU request.                                |
-| ketadb.resources.requests.memory               | string   | Memory request.                             |
-| ketadb.resources.limits.cpu                    | string   | CPU limit.                                  |
-| ketadb.resources.limits.memory                 | string   | Memory limit.                               |
-| ketadb.persistence.enabled                     | boolean  | Enable persistence storage.                  |
-| ketadb.persistence.annotations                | object   | Annotations for the persistence storage.     |
-| ketadb.volumeClaimTemplate.accessModes         | array    | Access modes for the volume claim, set to "ReadWriteOnce" here. |
-| ketadb.volumeClaimTemplate.resources.requests.storage | string | Storage request configuration.        |
-| ketadb.podSecurityContext.fsGroup              | integer  | Filesystem group for the Pod.                |
-| ketadb.podSecurityContext.runAsUser             | integer  | User ID for the Pod.                         |
-| ketadb.securityContext.privileged              | boolean  | Run the container in privileged mode.        |
-| ketadb.securityContext.capabilities.drop       | array    | Capabilities to drop from the container's capability list. |
-| ketadb.securityContext.capabilities.add        | array    | Capabilities to add to the container's capability list.    |
-| ketadb.securityContext.runAsNonRoot            | boolean  | Run the container as a non-root user.         |
-| ketadb.securityContext.runAsUser               | integer  | User ID for the container.                    |
-| ketadb.ingress.enabled                         | boolean  | Enable Ingress.                              |
-| ketadb.ingress.annotations                     | object   | Annotations for the Ingress.                  |
-| ketadb.ingress.path                            | string   | Path for the Ingress.                         |
-| ketadb.ingress.hostsSuffix                     | array    | Host suffixes for the Ingress.                |
-| ketadb.nodeSelector                            | object   | Node selector.                               |
-| ketadb.tolerations                             | array    | Tolerations configuration.                    |
-| ketadb.antiAffinity                            | string   | Pod anti-affinity configuration.              |
-| ketadb.nodeAffinity                            | object   | Node affinity configuration.                  |
-| ketadb.priorityClassName                       | string   | Priority class name for the Pod.              |
-| ketadb.terminationGracePeriod                  | integer  | Termination grace period in seconds.          |
-| ketadb.sysctlInitContainer.enabled             | boolean  | Enable sysctl init container.                 |
-| ketadb.sysctlInitContainer.sysctlVmMaxMapCount | integer  | sysctl vm.max_map_count configuration.        |
-| ketadb.sysctlInitContainer.resources            | object   | Resource configuration for the sysctl init container. |
-| ketadb.extraInitContainers                     | array    | Additional init container configuration.      |
-| ketadb.readinessProbe.failureThreshold         | integer  | Failure threshold for the readiness probe.    |
-| ketadb.readinessProbe.initialDelaySeconds      | integer  | Initial delay in seconds for the readiness probe.   |
-| ketadb.readinessProbe.periodSeconds            | integer  | Interval in seconds between readiness probes.       |
-| ketadb.readinessProbe.successThreshold         | integer  | Success threshold for the readiness probe.    |
-| ketadb.readinessProbe.timeoutSeconds           | integer  | Timeout in seconds for the readiness probe.   |
-| ketadb.livenessProbe.failureThreshold          | integer  | Failure threshold for the liveness probe.     |
-| ketadb.livenessProbe.initialDelaySeconds       | integer  | Initial delay in seconds for the liveness probe.    |
-| ketadb.livenessProbe.periodSeconds             | integer  | Interval in seconds between liveness probes.        |
-| ketadb.livenessProbe.timeoutSeconds            | integer  | Timeout in seconds for the liveness probe.    |
-| ketadb.dcServerUrl                             | string   | URL of the data center server.                |
-| ketadb.dcServerHeartbeats                      | string   | Heartbeat configuration for the data center server. |
-| ketadb.dcDataTransUrls                         | string   | Data transfer URL configuration for the data center. |
-| ketadb.alertHost                               | string   | Alert host.                                  |
-| ketadb.licenseCheckInterval                    | string   | Interval for license check.                   |
-| ketadb.unicast                                 | string   | Unicast configuration.                        |
-| ketadb.roles.master                            | boolean  | Whether it is a master role.                  |
-| ketadb.roles.web                               | boolean  | Whether it is a web role.                     |
-| ketadb.roles.data                              | boolean  | Whether it is a data role.                    |
-| ketadb.roles.ingest                            | string   | Ingest role configuration.                     |
-| ketadb.env                                     | object   | Environment variable configuration.           |
-| ketadb.envFrom                                 | array    | Import environment variables from Secret or ConfigMap. |
-| ketadb.secretMounts                            | array    | Secret mount configuration.                   |
-| ketadb.extraVolumeMounts                       | array    | Additional volume mount configuration.         |
-| ketadb.extraContainers                         | array    | Additional container configuration.           |
+| clusterName                             | string   | Name of the Ketadb cluster.                  |
+| replicas                                | integer  | Number of replicas for the Ketadb cluster.   |
+| podManagementPolicy                     | string   | Pod management policy, set to "Parallel" here.|
+| updateStrategy                          | string   | Update strategy, set to "RollingUpdate" here.|
+| image.repository                        | string   | Repository for the Ketadb image.             |
+| image.tag                               | string   | Tag for the Ketadb image.                    |
+| image.PullPolicy                        | string   | Image pull policy.                           |
+| pod.labels                              | object   | Labels for the Pod.                          |
+| pod.annotations                         | object   | Annotations for the Pod.                     |
+| service.labels                          | object   | Labels for the Service.                      |
+| service.type                            | string   | Type of the Service, set to "ClusterIP" here.|
+| service.nodePort                        | string   | NodePort for the Service.                    |
+| service.annotations                     | object   | Annotations for the Service.                 |
+| service.ports.http                      | string   | HTTP port.                                  |
+| service.ports.transport                 | string   | Transport port.                             |
+| service.ports.monitor                   | string   | Monitor port.                               |
+| service.ports.heartbeat                 | string   | Heartbeat port.                             |
+| service.ports.rpc                       | string   | RPC port.                                   |
+| service.ports.debug                     | string   | Debug port.                                 |
+| service.loadBalancerIP                  | string   | LoadBalancer IP.                            |
+| service.loadBalancerSourceRanges        | array    | LoadBalancer source IP ranges.               |
+| service.extraPorts                      | array    | Additional port configurations.              |
+| resources.requests.cpu                  | string   | CPU request.                                |
+| resources.requests.memory               | string   | Memory request.                             |
+| resources.limits.cpu                    | string   | CPU limit.                                  |
+| resources.limits.memory                 | string   | Memory limit.                               |
+| persistence.enabled                     | boolean  | Enable persistence storage.                  |
+| persistence.annotations                | object   | Annotations for the persistence storage.     |
+| volumeClaimTemplate.accessModes         | array    | Access modes for the volume claim, set to "ReadWriteOnce" here. |
+| volumeClaimTemplate.resources.requests.storage | string | Storage request configuration.        |
+| podSecurityContext.fsGroup              | integer  | Filesystem group for the Pod.                |
+| podSecurityContext.runAsUser             | integer  | User ID for the Pod.                         |
+| securityContext.privileged              | boolean  | Run the container in privileged mode.        |
+| securityContext.capabilities.drop       | array    | Capabilities to drop from the container's capability list. |
+| securityContext.capabilities.add        | array    | Capabilities to add to the container's capability list.    |
+| securityContext.runAsNonRoot            | boolean  | Run the container as a non-root user.         |
+| securityContext.runAsUser               | integer  | User ID for the container.                    |
+| ingress.enabled                         | boolean  | Enable Ingress.                              |
+| ingress.annotations                     | object   | Annotations for the Ingress.                  |
+| ingress.path                            | string   | Path for the Ingress.                         |
+| ingress.hostsSuffix                     | array    | Host suffixes for the Ingress.                |
+| nodeSelector                            | object   | Node selector.                               |
+| tolerations                             | array    | Tolerations configuration.                    |
+| antiAffinity                            | string   | Pod anti-affinity configuration.              |
+| nodeAffinity                            | object   | Node affinity configuration.                  |
+| priorityClassName                       | string   | Priority class name for the Pod.              |
+| terminationGracePeriod                  | integer  | Termination grace period in seconds.          |
+| sysctlInitContainer.enabled             | boolean  | Enable sysctl init container.                 |
+| sysctlInitContainer.sysctlVmMaxMapCount | integer  | sysctl vm.max_map_count configuration.        |
+| sysctlInitContainer.resources            | object   | Resource configuration for the sysctl init container. |
+| extraInitContainers                     | array    | Additional init container configuration.      |
+| readinessProbe.failureThreshold         | integer  | Failure threshold for the readiness probe.    |
+| readinessProbe.initialDelaySeconds      | integer  | Initial delay in seconds for the readiness probe.   |
+| readinessProbe.periodSeconds            | integer  | Interval in seconds between readiness probes.       |
+| readinessProbe.successThreshold         | integer  | Success threshold for the readiness probe.    |
+| readinessProbe.timeoutSeconds           | integer  | Timeout in seconds for the readiness probe.   |
+| livenessProbe.failureThreshold          | integer  | Failure threshold for the liveness probe.     |
+| livenessProbe.initialDelaySeconds       | integer  | Initial delay in seconds for the liveness probe.    |
+| livenessProbe.periodSeconds             | integer  | Interval in seconds between liveness probes.        |
+| livenessProbe.timeoutSeconds            | integer  | Timeout in seconds for the liveness probe.    |
+| dcServerUrl                             | string   | URL of the data center server.                |
+| dcServerHeartbeats                      | string   | Heartbeat configuration for the data center server. |
+| dcDataTransUrls                         | string   | Data transfer URL configuration for the data center. |
+| alertHost                               | string   | Alert host.                                  |
+| licenseCheckInterval                    | string   | Interval for license check.                   |
+| unicast                                 | string   | Unicast configuration.                        |
+| roles.master                            | boolean  | Whether it is a master role.                  |
+| roles.web                               | boolean  | Whether it is a web role.                     |
+| roles.data                              | boolean  | Whether it is a data role.                    |
+| roles.ingest                            | string   | Ingest role configuration.                     |
+| env                                     | object   | Environment variable configuration.           |
+| envFrom                                 | array    | Import environment variables from Secret or ConfigMap. |
+| secretMounts                            | array    | Secret mount configuration.                   |
+| extraVolumeMounts                       | array    | Additional volume mount configuration.         |
+| extraContainers                         | array    | Additional container configuration.           |
 | mysql.replicaCount                | 1                                | Number of replicas                                       |
 | mysql.image.repository            | "mysql"                          | Image repository name                                    |
 | mysql.image.pullPolicy            | "Always"                         | Image pull policy                                        |
@@ -143,4 +122,9 @@ helm install ketadb keta-chart/ketadb -n keta --set ketadb.ingress.enabled=true 
 | mysql.extraVolumes.size           | 8Gi                              | Extra volume size                                        |
 | mysql.configurationFilesPath      | /etc/mysql/conf.d/              | Custom MySQL configuration files path                     |
 | mysql.configurationFiles          |                                  | Custom MySQL configuration files to override default settings |                                     |
+
+## FAQ
+### Common deployment scenarios.
+* [Default](./examples/default)
+* [Docker For Mac](./examples/docker-for-mac)
 

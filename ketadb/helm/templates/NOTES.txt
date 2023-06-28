@@ -1,6 +1,6 @@
 1. Watch all cluster members come up.
   $ kubectl get pods --namespace={{ .Release.Namespace }} -l app={{ template "ketadb.uname" . }} -w
-{{- if .Values.ketadb.ingress.enabled }}
+{{- if .Values.ingress.enabled }}
 2. view web app page.
-  http://{{ .Values.ketadb.ingress.hostsSuffix | first }}
+  http://{{ .Values.ingress.hostsSuffix | first }}
 {{- end }}

@@ -19,7 +19,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- define "ketadb.uname" -}}
 {{- if empty .Values.fullnameOverride -}}
 {{- if empty .Values.nameOverride -}}
-{{ .Values.ketadb.clusterName }}
+{{ .Values.clusterName }}
 {{- else -}}
 {{ .Values.nameOverride }}
 {{- end -}}
