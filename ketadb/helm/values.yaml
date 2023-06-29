@@ -14,7 +14,7 @@ updateStrategy: RollingUpdate  # 滚动升级
 
 image: 
   repository: "docker.ketaops.cc/ketaops/ketadb"
-  tag: "v1.2.2"
+  tag: "latest"
   PullPolicy: "Always"
 
 pod:
@@ -132,6 +132,13 @@ licenseCheckInterval: "300"
 
 unicast: ""
 
+mysql:
+  host: mysql
+  port: "3306"
+  password: ""
+  database: "ketadb"
+  username: root
+
 
 env: {}
   
@@ -156,83 +163,3 @@ extraContainers: []
 # - name: do-something
 #   image: busybox
 #   command: ['do', 'something']
-
-mysql:
-  # Default values for mysql.
-  # This is a YAML-formatted file.
-  # Declare variables to be passed into your templates.
-
-  replicaCount: 1
-
-  image:
-    repository: "mysql"
-    pullPolicy: "Always"
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: "8.0.32"
-
-  imagePullSecrets: []
-  nameOverride: ""
-  fullnameOverride: "mysql"
-
-  serviceAccount:
-    # Specifies whether a service account should be created
-    create: false
-    # Annotations to add to the service account
-    annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
-
-  podAnnotations: {}
-
-  podSecurityContext: {}
-    # fsGroup: 2000
-
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
-
-  service:
-    type: NodePort
-    port: 3306
-
-
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
-
-
-  nodeSelector: {}
-
-  tolerations: []
-
-  affinity: {}
-
-  extraVolumes:
-    name: mysql-data
-    persistentVolumeClaimName: mysql-data-pvc
-    size: 10Gi
-    # storageClass: ""
-
-  # Custom mysql configuration files path
-  configurationFilesPath: /etc/mysql/conf.d/
-
-  # Custom mysql configuration files used to override default mysql settings
-  configurationFiles:
-    mysql.cnf: |-
-      [mysqld]
-      max_connections=2000
-      max-allowed-packet=1024000000
-      skip_log_bin

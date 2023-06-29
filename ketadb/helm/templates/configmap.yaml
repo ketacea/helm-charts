@@ -9,24 +9,24 @@ metadata:
     app: "{{ template "ketadb.uname" . }}"
 data:
   keta.yml: |
-    cluster.name: ketadb #集群名
+    cluster.name: ketadb
     http.port: 9200
     transport.tcp.port: 9300
-    keta.app.package.market: lib/keta-apps # 应用市场
-    keta.dc.server.shell.path: lib/keta-agent/shell # agent 安装脚本
+    keta.app.package.market: lib/keta-apps
+    keta.dc.server.shell.path: lib/keta-agent/shell
     keta.dc.agent.package: lib/keta-agent/lib
-    keta.alert.attachment.root: var/alert/attachment # 告警附件
-    keta.alert.template.root: var/alert/template # 告警模版
-    keta.lookup.home: var/lookup # 查找表
-    keta.matrix.cache.path: var/cache # search2计算缓存
-    keta.job.cache.disk.path: var/cache # search1计算缓存
-    path.logs: /usr/share/keta/var/log # 日志
+    keta.alert.attachment.root: var/alert/attachment
+    keta.alert.template.root: var/alert/template 
+    keta.lookup.home: var/lookup 
+    keta.matrix.cache.path: var/cache 
+    keta.job.cache.disk.path: var/cache 
+    path.logs: /usr/share/keta/var/log 
     http.max_content_length: "500mb"
     network.host: 0.0.0.0
-    keta.database.mysql.url: mysql-svc:3306
-    keta.database.mysql.database: phoenix
-    keta.database.mysql.user: root
-    keta.database.mysql.password: "654321"
+    keta.database.mysql.url: {{ .Values.mysql.host }}:{{ .Values.mysql.port }}
+    keta.database.mysql.database: {{ .Values.mysql.database }}
+    keta.database.mysql.user: {{ .Values.mysql.username }}
+    keta.database.mysql.password: {{ .Values.mysql.password }}
     keta.scheduler.master.assign.interval: "3"
     keta.scheduler.worker.fetchtasks.interval: "4"
     keta.dc.data.trans.path: /api/v1/data

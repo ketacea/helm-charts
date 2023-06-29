@@ -1,0 +1,7 @@
+replicas: 1
+image:
+  repository: docker.ketaops.cc/xishuhq/ketadb
+  tag: develop-24
+
+mysql:
+  password: '654321'

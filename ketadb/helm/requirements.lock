@@ -1,6 +1,0 @@
-dependencies:
-- name: mysql
-  repository: http://charts.ketaops.cc
-  version: 0.1.0
-digest: sha256:7ad7facdfde0b99fea20d67d541a7d6548c998b57c27884e891dae68d152d53c
-generated: "2023-06-25T19:03:04.115668+08:00"

@@ -168,8 +168,6 @@ spec:
               fieldRef:
                 fieldPath: status.podIP
 
-          - name: UPGRADE_TIME
-            value: {{ date "2006-01-02-150405" .Release.Time }}
           - name: keta.dc.server.url
           {{- if .Values.dcServerUrl }}
             value: "{{ .Values.dcServerUrl }}"

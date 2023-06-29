@@ -12,10 +12,14 @@ helm repo add keta-chart http://chart-prod.ketaops.cc
 helm repo update keta-chart
 ```
 
+### Install mysql
+```bash
+helm install --create-namespace mysql keta-chart/mysql -n keta --wait
+```
+
 ### Install ketadb
 ```bash
-helm install --create-namespace ketadb keta-chart/ketadb -n keta
-
+helm install ketadb keta-chart/ketadb -n keta
 ```
 
 

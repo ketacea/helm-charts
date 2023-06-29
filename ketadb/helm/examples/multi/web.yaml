@@ -1,0 +1,15 @@
+---
+replicas: 3
+image:
+  repository: docker.ketaops.cc/xishuhq/ketadb
+  tag: develop-24
+roles:
+  master: false
+  web: true
+  data: false
+  ingest: true
+
+persistence:
+  enabled: false
+
+unicast: "ketadb-master,ketadb-data,ketadb-web"

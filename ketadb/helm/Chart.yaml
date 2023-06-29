@@ -1,7 +1,7 @@
 apiVersion: v1
 appVersion: 1.2.1
 description: Official ketadb helm chart for xishu
-home: https://gitee.com/xishuhq/ketadb
+home: https://xishuhq.com
 icon: https://qiniu.staticfile.org/static/logo-9912e7f775b7345cb71dc43ac0eb2ca9.png
 maintainers:
 - email: keta@xishuhq.com
@@ -10,7 +10,3 @@ name: ketadb
 sources:
 - https://gitee.com/xishuhq/ketadb
 version: 1.4.0
-dependencies:
-  - name: mysql
-    repository: http://charts.ketaops.cc
-    version: 0.1.0
