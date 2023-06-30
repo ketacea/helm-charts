@@ -1,6 +1,6 @@
 # Docker for Mac
 
-This example deploy a 1 nodes ketadb cluster on [Docker for Mac][]
+This example deploy a 1 nodes ketadb cluster on [Docker for Mac][] with database for h2
 using [custom-values](./values.yaml)
 
 Note that this configuration should be used for test only and isn't recommended
@@ -9,7 +9,7 @@ for production.
 
 ## Usage
 
-* Deploy Elasticsearch chart with the default values: `make install`
+* Deploy ketadb chart with the default values: `make install`
 
 * You can now setup a port forward to query Elasticsearch API:
 

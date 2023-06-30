@@ -12,5 +12,3 @@ roles:
   
 persistence:
   enabled: false
-
-unicast: "ketadb-master,ketadb-data,ketadb-web"

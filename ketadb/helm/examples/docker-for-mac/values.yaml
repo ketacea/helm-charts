@@ -1,6 +1,8 @@
 ---
 replicas: 1
-
+image:
+  repository: docker.ketaops.cc/xishuhq/ketadb
+  tag: develop-24
 # Permit co-located instances for solitary minikube virtual machines.
 antiAffinity: "soft"
 
@@ -23,10 +25,3 @@ volumeClaimTemplate:
   resources:
     requests:
       storage: 100M
-
-mysql:
-  extraVolumes:
-    name: mysql-data
-    persistentVolumeClaimName: mysql-data-pvc
-    size: 1Gi
-    storageClass: hostpath

@@ -1,4 +1,5 @@
 ---
+{{- if .Values.service.enabled }}
 kind: Service
 apiVersion: v1
 metadata:
@@ -19,7 +20,7 @@ spec:
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
     chart: "{{ .Chart.Name }}"
-    app: "{{ .Release.Name }}"
+    app: {{ template "ketadb.uname" . }}
   ports:
   {{- range $key,$value := .Values.service.ports }}
   - name: {{ $key }}
@@ -36,4 +37,34 @@ spec:
 {{- end }}
 {{- if .Values.service.extraPorts }}
 {{ toYaml .Values.service.extraPorts | indent 2}}
+{{- end }}
+{{- end }}
+
+---
+{{- if .Values.roles.master }}
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ template "ketadb.uname" . }}-headless
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{ .Chart.Name }}"
+    app: "{{ template "ketadb.uname" . }}"
+{{- if .Values.service.labelsHeadless }}
+{{ toYaml .Values.service.labelsHeadless | indent 4 }}
+{{- end }}
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  clusterIP: None # This is needed for statefulset hostnames like ketadb-0 to resolve
+  # Create endpoints also if the related pod isn't ready
+  publishNotReadyAddresses: true
+  selector:
+    app: "{{ template "ketadb.uname" . }}"
+  ports:
+  - name: http
+    port: {{ .Values.service.ports.http }}
+  - name: transport
+    port: {{ .Values.service.ports.transport }}
 {{- end }}

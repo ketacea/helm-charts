@@ -18,6 +18,7 @@ uninstall:
 	helm del ${PREFIX}-data -n ${NAMESPACE}
 	helm del ${PREFIX}-web -n ${NAMESPACE}
 	helm del ${PREFIX}-master -n ${NAMESPACE}
+	helm del ${MYSQL_RELEASE} -n ${NAMESPACE}
 
 pruge:
 	kubectl delete ns ${NAMESPACE}

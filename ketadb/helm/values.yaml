@@ -8,12 +8,13 @@ roles:
   web: true
   data: true
   ingest: true
+  dataStorageType: hot # hot, warm, cold
 
 podManagementPolicy: OrderedReady  # 并发部署
 updateStrategy: RollingUpdate  # 滚动升级
 
 image: 
-  repository: "docker.ketaops.cc/ketaops/ketadb"
+  repository: "docker.ketaops.cc/xishuhq/ketadb"
   tag: "latest"
   PullPolicy: "Always"
 
@@ -21,10 +22,12 @@ pod:
   labels: {}  # 为pod添加标签
   annotations: {}  # 为pod添加注释
 
-KETA_JAVA_OPTS: "" # default: "-Xmx2g -Xms2g"
+ketaJavaOptions: "" # default: "-Xmx2g -Xms2g"
 
 service:
+  enabled: true
   labels: {}
+  labelsHeadless: {}
   type: ClusterIP
   nodePort: ""
   annotations: {}
@@ -34,6 +37,7 @@ service:
     monitor: "10005"
     heartbeat: "9400"
     rpc: "9500"
+    otlp: "4317"
     debug: "9600"
   loadBalancerIP: ""
   loadBalancerSourceRanges: []
@@ -130,14 +134,12 @@ alertHost: ""
 
 licenseCheckInterval: "300"
 
-unicast: ""
-
+# default use h2 database
 mysql:
-  host: mysql
-  port: "3306"
-  password: ""
-  database: "ketadb"
-  username: root
+  url: jdbc:h2:file:/usr/share/keta/var/h2;MODE=MYSQL;DATABASE_TO_LOWER=true
+  password: h2database
+  database: ""
+  username: ""
 
 
 env: {}

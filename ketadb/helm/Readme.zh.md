@@ -12,6 +12,11 @@ helm repo add keta-chart http://chart-prod.ketaops.cc
 helm repo update keta-chart
 ```
 
+### 安装mysql
+```bash
+helm install --create-namespace mysql keta-chart/mysql -n keta
+```
+
 ### 安装ketadb
 
 ```bash
@@ -24,21 +29,38 @@ kubectl get pod -n keta
 kubectl logs ketadb -n keta
 ```
 
-## 更新
-### 从仓库更新helm chart
-```bash
-helm repo update keta-chart
-```
-
-### 更新ketadb
-```bash
-helm upgrade ketadb keta-chart/ketadb -n keta
-```
-
-## 设置ingress
-```bash
-helm install ketadb keta-chart/ketadb -n keta --set ingress.enabled=true --set ingress.hostsSuffix[0]=example.com
-```
+## 使用说明
+* 此chart包括几个可以使用的配置[示例](./examples/)作为参考
+    * [Default](./examples/default/Readme.md)  默认部署方式，将会启动三个节点，同时拥有master、data、web角色
+    * [Docker For Mac](./examples/docker-for-mac/Readme.md) 测试方案，将启动一个节点，后端数据库使用本地数据库（h2）
+    * [mutil](./examples/multi/Readme.md)  多节点部署方案，将包括三个角色(master、data、web)，每个角色三个节点
+* 您可能需要为你的集群设置合理的资源配置
+    * JVM: `ketaJavaOptions`, 
+    * CPU and Memory: `resources`
+    * Storage: `volumeClaimTemplate`
+* 在生产部署时，建议对节点的类型做划分，当前支持`master`, `data`, `web`，在[example/multi](./examples/multi/)目录中有此示例，可以查看其如何工作的。值得说明的是，集群中只能包含一个master角色的release。在master角色的workload下，你可以部署多个Pod。
+* 关于storage选择，从高可用角度推荐使用网络存储，比如ceph，nfs等；从高性能角度讲，可以使用本地存储，比如hostPath、carina等
+* 关于节点角色说明：
+    * master：
+    * data：
+    * web：
+* 关于节点分层存储，你可以在部署时指定data节点的存储类型`roles.dataStorageType`, 可以选择`hot`, `cold`, `warm`
+* 关于扩容
+    * 存储扩容，能否进行存储扩容主要决定因素是storage class提供商是否支持该功能，当它支持时，您可以通过如下命令修改pvc来扩容；
+        ```bash
+        kubectl patch pvc ketadb-ketadb-0 -n keta --patch '{"spec":{"resources":{"requests":{"storage": "30Gi"}}}}'
+        ```
+        需要注意的是，某些storage class提供商修改后，需要重启Pod来生效。具体的要求可以参考您的storage class提供商的说明
+    * CPU/Memory扩容，当遇到节点资源不满足需求时，你可以修改container的资源：
+        ```bash
+        helm upgrade ketadb keta-chart/ketadb -n keta --set resources.requests.cpu="4" --set resources.requests.memory="8Gi" --set resources.limit.cpu="8" --set resources.limit.memory="16Gi"
+        ```
+    * 节点扩容，您可以通过动态增加Pod来实现节点扩容，假设您之前statefulset下有1个Pod，可以执行下面语句扩展为3个节点：`kubectl scale statefulsets ketadb --replicas=3`
+* 关于缩容，您可以通过减少Pod数量来对集群缩容，需要注意的是，当您的集群数据不能都存在副本的情况下，您可能使用第一种方案，否则您可以使用第二种方案
+    * 方案1: xxx(需要描述节点标记为驱逐的方式)
+    * 方案2: 缩容需要数据仓库的副本数量不能低于2，针对data节点，缩容需要循序渐进，不能用力过猛，否则会导致数据丢失。比如，当前有3个数据节点，需要缩减为1个，您需要先缩减为2个，等到集群的状态变成绿色时，再设置为1个，并继续等待其变成绿色。缩容并不会删除pvc，所以当您发现数据丢失，您可以重新将Pod数量调整回来，并检查数据设置是否存在问题。如您某些仓库副本数量低于2，则需要采用第一种方案。
+* 关于数据迁移
+    * 待补充
 
 ## 其它参数
 

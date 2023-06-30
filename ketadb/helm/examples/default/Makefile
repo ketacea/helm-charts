@@ -2,6 +2,7 @@ RELEASE := ketadb-default
 TIMEOUT := 600s
 NAMESPACE := keta
 MYSQL_PASSWORD := "password123"
+MYSQL_RELEASE := mysql
 
 init:
 	helm repo add keta-chart http://chart-prod.ketaops.cc --force-update
@@ -13,6 +14,7 @@ install: init
 
 uninstall:
 	helm del ${RELEASE} -n ${NAMESPACE}
+	helm del ${MYSQL_RELEASE} -n ${NAMESPACE}
 
 pruge:
 	kubectl delete ns ${NAMESPACE}

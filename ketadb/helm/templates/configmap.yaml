@@ -1,3 +1,4 @@
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -23,10 +24,10 @@ data:
     path.logs: /usr/share/keta/var/log 
     http.max_content_length: "500mb"
     network.host: 0.0.0.0
-    keta.database.mysql.url: {{ .Values.mysql.host }}:{{ .Values.mysql.port }}
-    keta.database.mysql.database: {{ .Values.mysql.database }}
-    keta.database.mysql.user: {{ .Values.mysql.username }}
-    keta.database.mysql.password: {{ .Values.mysql.password }}
+    keta.database.mysql.url: {{.Values.mysql.url |default "jdbc:h2:file:/usr/share/keta/var/h2;MODE=MYSQL;DATABASE_TO_LOWER=true"}}
+    keta.database.mysql.database: {{ .Values.mysql.database |default "h2database" }}
+    keta.database.mysql.user: "{{ .Values.mysql.username }}"
+    keta.database.mysql.password: "{{ .Values.mysql.password }}"
     keta.scheduler.master.assign.interval: "3"
     keta.scheduler.worker.fetchtasks.interval: "4"
     keta.dc.data.trans.path: /api/v1/data
@@ -47,7 +48,7 @@ data:
     keta.static.file.root.path: ./lib/keta-web
     path.data: /usr/share/keta/var/data
     keta.matrix.ml.node.urls: keta-ml:5005
-    node.attr.tag: hot   # hot, warm, cold
+    node.attr.tag: {{ .Values.roles.dataStorageType | default "hot" }}   # hot, warm, cold
 
 
 
@@ -70,7 +71,7 @@ data:
     # Xms represents the initial size of total heap space
     # Xmx represents the maximum size of total heap space
 
-    {{ .Values.KETA_JAVA_OPTS | default "-Xmx1g -Xms1g" }}
+    {{ .Values.ketaJavaOptions | default "-Xmx1g -Xms1g" }}
 
     ################################################################
     ## Expert settings

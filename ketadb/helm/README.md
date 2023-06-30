@@ -129,6 +129,7 @@ helm install ketadb keta-chart/ketadb -n keta
 
 ## FAQ
 ### Common deployment scenarios.
-* [Default](./examples/default)
-* [Docker For Mac](./examples/docker-for-mac)
+* [Default](./examples/default/Readme.md)
+* [Docker For Mac](./examples/docker-for-mac/Readme.md)
+* [mutil](./examples/multi/Readme.md)
 
