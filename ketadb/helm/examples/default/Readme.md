@@ -8,7 +8,7 @@ This example deploy a 3 nodes ketadb cluster using
 
 * Deploy ketadb chart with the default values: `make install`
 
-* You can now setup a port forward to query Elasticsearch API:
+* You can now setup a port forward to query ketadb API:
 
   ```
   kubectl port-forward svc/ketadb-default 9200 -n keta
@@ -22,5 +22,5 @@ This example deploy a 3 nodes ketadb cluster using
   # delete release
   make uninstall
   # delete namespace
-  make pruge
+  make purge
   ```

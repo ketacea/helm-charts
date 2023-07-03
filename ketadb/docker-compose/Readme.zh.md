@@ -9,7 +9,8 @@
 
 ## 安装步骤
 1. 将此目录（docker-compose）放到部署目录下，例如：～/docker-compose
-2. 执行安装
+2. 修改`.env`中`MYSQL_PASSWORD`参数值，为mysql数据库设置必要的密码（其它参数可以默认）
+3. 执行安装
     ```bash
     cd ~/docker-compose
     docker-compose up -d
@@ -60,4 +61,13 @@
     # JVM OPTIONS
     JVM_OPTIONS="-Xmx2g -Xms2g"
 
+    # MYSQL OPTIONS
+    MYSQL_USER=keta
+    MYSQL_DATABASE=ketadb
+    MYSQL_PASSWORD="123456"
+    MYSQL_RANDOM_ROOT_PASSWORD="true"
     ```
+## 其它说明
+* `mysql`的配置中，默认为mysql的root用户生成了随机的密码，可使用命令`docker-compose logs  mysql |grep "GENERATED ROOT PASSWORD"`查看
+* ketadb以及keta-ml的配置均通过环境变量的形式注入，各配置参数参考[参数说明](*todo: ketadb以及ketaml参数说明*)
+* 当前部署方式为单机部署，仅限于测试验证使用，不推荐作为生产部署方式。生产部署请参考[k8s部署](../helm/Readme.zh.md)

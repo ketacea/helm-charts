@@ -12,5 +12,5 @@ install: init
 uninstall:
 	helm del ${RELEASE} -n ${NAMESPACE}
 
-pruge:
+purge:
 	kubectl delete ns ${NAMESPACE}

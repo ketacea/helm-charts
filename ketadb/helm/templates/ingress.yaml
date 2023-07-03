@@ -30,7 +30,7 @@ spec:
   {{- end }}
 {{- end }}
   rules:
-  {{- range .Values.ingress.hostsSuffix }}
+  {{- range .Values.ingress.hosts }}
     - host: {{ . }}
       http:
         paths:

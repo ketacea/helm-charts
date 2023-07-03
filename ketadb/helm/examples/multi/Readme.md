@@ -1,6 +1,6 @@
 # Docker for Mac
 
-This example deploy an Elasticsearch 8.5.1 cluster composed of 3 different Helm releases:
+This example deploy an ketadb 8.5.1 cluster composed of 3 different Helm releases:
 
 * ketadb-master for the 3 master nodes using [master values](./master.yaml)
 * ketadb-data for the 3 data nodes using [data values](./data.yaml)
@@ -9,9 +9,9 @@ This example deploy an Elasticsearch 8.5.1 cluster composed of 3 different Helm 
 
 ## Usage
 
-* Deploy Elasticsearch chart with the default values: `make install`
+* Deploy ketadb chart with the default values: `make install`
 
-* You can now setup a port forward to query Elasticsearch API:
+* You can now setup a port forward to query ketadb API:
 
   ```bash
   kubectl port-forward svc/ketadb-web 9200 -n keta
@@ -23,7 +23,7 @@ This example deploy an Elasticsearch 8.5.1 cluster composed of 3 different Helm 
   # delete release
   make uninstall
   # delete namespace
-  make pruge
+  make purge
   ```
 
 [docker for mac]: https://docs.docker.com/docker-for-mac/kubernetes/

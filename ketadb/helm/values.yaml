@@ -45,10 +45,10 @@ service:
 
 resources:
   requests:
-    cpu: "2000m"
+    cpu: "2"
     memory: "4Gi"
   limits:
-    cpu: "2000m"
+    cpu: "2"
     memory: "4Gi"
 
 persistence:
@@ -85,7 +85,7 @@ ingress:
     kubernetes.io/ingress.class: nginx
   # kubernetes.io/tls-acme: "true"
   path: /
-  hostsSuffix:
+  hosts:
     - example.com
   tls: 
     # - hosts:
@@ -152,8 +152,8 @@ envFrom: []
 #     name: config-map
 
 secretMounts: []
-#  - name: elastic-certificates
-#    secretName: elastic-certificates
+#  - name: ketadb-certificates
+#    secretName: ketadb-certificates
 #    path: /usr/share/ketadb/config/certs
 
 extraVolumeMounts: []

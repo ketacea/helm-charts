@@ -20,5 +20,5 @@ uninstall:
 	helm del ${PREFIX}-master -n ${NAMESPACE}
 	helm del ${MYSQL_RELEASE} -n ${NAMESPACE}
 
-pruge:
+purge:
 	kubectl delete ns ${NAMESPACE}

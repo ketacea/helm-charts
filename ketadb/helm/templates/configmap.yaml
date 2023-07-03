@@ -157,7 +157,7 @@ data:
     status = error
 
     # log action execution errors for easier debugging
-    logger.action.name = org.elasticsearch.action
+    logger.action.name = org.ketadb.action
     logger.action.level = debug
 
     appender.console.type = Console
@@ -207,7 +207,7 @@ data:
     appender.deprecation_rolling.strategy.type = DefaultRolloverStrategy
     appender.deprecation_rolling.strategy.max = 4
 
-    logger.deprecation.name = org.elasticsearch.deprecation
+    logger.deprecation.name = org.ketadb.deprecation
     logger.deprecation.level = warn
     logger.deprecation.appenderRef.deprecation_rolling.ref = deprecation_rolling
     logger.deprecation.additivity = false
@@ -289,6 +289,6 @@ data:
       },
       "smartElfAddress": "",
       "copyright":true,
-      "recordNumber": "粤ICP备2022101179号-1",
-      "recordNumberLink": "https://beian.miit.gov.cn"
+      "recordNumber": "",
+      "recordNumberLink": ""
     }

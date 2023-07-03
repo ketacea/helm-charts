@@ -11,7 +11,7 @@ for production.
 
 * Deploy ketadb chart with the default values: `make install`
 
-* You can now setup a port forward to query Elasticsearch API:
+* You can now setup a port forward to query ketadb API:
 
   ```bash
   kubectl port-forward svc/ketadb-for-mac 9200 -n keta
@@ -23,7 +23,7 @@ for production.
   # delete release
   make uninstall
   # delete namespace
-  make pruge
+  make purge
   ```
 
 [docker for mac]: https://docs.docker.com/docker-for-mac/kubernetes/
