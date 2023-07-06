@@ -11,13 +11,18 @@
 1. 将此目录（docker-compose）放到部署目录下，例如：～/docker-compose
 2. 修改`.env`中`MYSQL_PASSWORD`参数值，为mysql数据库设置必要的密码（其它参数可以默认）
 3. 执行安装
+    为了方便部署，我们在此目录下设定了一个Makefile，您可以使用`make install`来安装，与直接使用`docker-compose`不同的是，makefile中定义了一些检查逻辑，可以帮助您检查配置是否正确。
     ```bash
     cd ~/docker-compose
-    docker-compose up -d
+    make install
     # 检查安装结果
-    docker-compose ps
+    make status
     # 查看日志
-    docker-compose logs -f ketadb
+    make log ketadb
+    # 停止服务
+    make down
+    # 清理产生的数据
+    make purge
     ```
 
 ## 自定义配置
@@ -64,7 +69,7 @@
     # MYSQL OPTIONS
     MYSQL_USER=keta
     MYSQL_DATABASE=ketadb
-    MYSQL_PASSWORD="123456"
+    MYSQL_PASSWORD=""  # 这个密码需要设置
     MYSQL_RANDOM_ROOT_PASSWORD="true"
     ```
 ## 其它说明
