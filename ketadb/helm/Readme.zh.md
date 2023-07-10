@@ -14,13 +14,15 @@ helm repo update keta-chart
 
 ### 安装mysql
 ```bash
-helm install --create-namespace mysql keta-chart/mysql -n keta
+# 为了您的数据安全，请修改下面的密码
+helm install --create-namespace mysql keta-chart/mysql -n keta --set auth.createDatabase=true --set auth.database=ketadb --set auth.username=keta --set auth.password="changeThisPassword"
 ```
 
 ### 安装ketadb
 
 ```bash
-helm install --create-namespace ketadb keta-chart/ketadb -n keta
+# 这里设置的mysql用户和密码与mysql的用户密码一致
+helm install --create-namespace ketadb keta-chart/ketadb -n keta --set mysql.host=mysql --set mysql.password="changeThisPassword" --set mysql.user=keta --set mysql.database=ketadb
 ```
 
 ### 查看部署状态和日志
@@ -34,6 +36,7 @@ kubectl logs ketadb -n keta
     * [Default](./examples/default/Readme.md)  默认部署方式，将会启动三个节点，同时拥有master、data、web角色
     * [Docker For Mac](./examples/docker-for-mac/Readme.md) 测试方案，将启动一个节点，后端数据库使用本地数据库（h2）
     * [mutil](./examples/multi/Readme.md)  多节点部署方案，将包括三个角色(master、data、web)，每个角色三个节点
+    * [replica-mysql](./examples/replica-mysql/Readme.md)  mysql高可用方案，包含两个mysql节点，ketadb为默认方案（3个节点）
     * *todo: 更多场景*
 * 您可能需要为你的集群设置合理的资源配置
     * JVM: `ketaJavaOptions`，修改此参数调整java jvm内存大小，默认为`-Xmx1g -Xms1g`

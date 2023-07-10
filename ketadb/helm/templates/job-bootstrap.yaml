@@ -1,0 +1,41 @@
+{{- if and .Values.bootstrap.enabled .Values.mysql.host }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-bootstrap
+  labels:
+    name: {{ .Release.Name }}
+  annotations:
+    # "helm.sh/hook": "post-install,post-upgrade"
+    "helm.sh/hook-delete-policy": "hook-succeeded,before-hook-creation"
+    "helm.sh/hook-weight": "0"
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      {{- with .Values.bootstrap.tolerations }}
+      tolerations:
+{{ toYaml . | indent 6 }}
+      {{- end }}
+      {{- with .Values.bootstrap.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+      containers:
+      - name: bootstrap
+        image: "bitnami/mysql:8.0.33-debian-11-r17"
+        imagePullPolicy: "{{ .Values.image.PullPolicy }}"
+        command:
+        - bash
+        args:
+        - /readonly-config/bootstrap.sh
+        volumeMounts:
+        - name: ketaconfig
+          mountPath: /readonly-config/bootstrap.sh
+          readOnly: true
+          subPath: bootstrap.sh
+      volumes:
+      - name: ketaconfig
+        configMap:
+          name: {{ .Release.Name }}-config
+{{- end -}}

@@ -1,4 +1,13 @@
 
+{{- $mysqlurl := printf "%s:%s" .Values.mysql.host .Values.mysql.port -}}
+{{- $database := .Values.mysql.database -}}
+{{- if and .Values.mysql.host .Values.mysql.port -}}
+{{- $mysqlurl = printf "%s:%s" .Values.mysql.host .Values.mysql.port -}}
+{{- $database = .Values.mysql.database -}}
+{{- else -}}
+{{- $mysqlurl = "jdbc:h2:file:/usr/share/keta/var/h2;MODE=MYSQL;DATABASE_TO_LOWER=true" -}}
+{{- $database = "h2database" -}}
+{{- end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -24,8 +33,8 @@ data:
     path.logs: /usr/share/keta/var/log 
     http.max_content_length: "500mb"
     network.host: 0.0.0.0
-    keta.database.mysql.url: {{.Values.mysql.url |default "jdbc:h2:file:/usr/share/keta/var/h2;MODE=MYSQL;DATABASE_TO_LOWER=true"}}
-    keta.database.mysql.database: {{ .Values.mysql.database |default "h2database" }}
+    keta.database.mysql.url: {{ $mysqlurl }}
+    keta.database.mysql.database: {{ $database }}
     keta.database.mysql.user: "{{ .Values.mysql.username }}"
     keta.database.mysql.password: "{{ .Values.mysql.password }}"
     keta.scheduler.master.assign.interval: "3"
@@ -292,3 +301,32 @@ data:
       "recordNumber": "",
       "recordNumberLink": ""
     }
+  bootstrap.sh: |
+    #!/bin/bash
+    # set -x
+    error_cnt=0
+    try_once() {
+      echo "INSERT INTO token (id, createTime, description, enabled, expireTime, lastAccessIP, lastAccessTime, name, notBeforeTime, type) \
+            SELECT \
+                'b448ff35-0233-4655-9d6f-7e0e88efdd76', '2023-03-26 12:22:00.556000', 'Automatically created at helm deployment time for keta-agent installation of sidecar type', 1, '2099-12-31 23:59:59.999000', '10.0.1.97', '2023-03-28 05:58:26.127000', 'infra', '2023-03-26 12:22:00.556000', 'collect' \
+                FROM DUAL WHERE NOT EXISTS (SELECT name FROM token where name = 'infra'); \
+            " \
+       | mysql -h{{ .Values.mysql.host }} -P{{ .Values.mysql.port }} -u{{ .Values.mysql.username }} -p{{ .Values.mysql.password }} {{ .Values.mysql.database }}
+
+      if [[ $? == 0 ]]; then
+        return 0;
+      fi
+      return 1
+    }
+
+    until try_once; do
+      let error_cnt=$error_cnt+1
+      echo "${error_cnt}"
+      sleep 10
+      if [[ ${error_cnt} -ge 360 ]];then
+        break
+      fi
+    done
+
+    echo "bootstrap done"
+    exit 0

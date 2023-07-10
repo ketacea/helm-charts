@@ -1,0 +1,40 @@
+{{- if .Values.enabled }}
+{{- if .Values.eventListen.enabled }}
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Namespace }}-{{ .Release.Name }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}"
+    app: "{{ .Release.Name }}"
+{{- if .Values.eventListen.service.labels }}
+{{ toYaml .Values.eventListen.service.labels | indent 4}}
+{{- end }}
+  annotations:
+{{ toYaml .Values.eventListen.service.annotations | indent 4 }}
+spec:
+  type: {{ .Values.eventListen.service.type }}
+  selector:
+    name: {{ .Release.Name | quote }}
+    release: {{ .Release.Name | quote }}
+  ports:
+  {{- range $key,$value := .Values.eventListen.service.ports }}
+  - name: {{ $key }}
+    protocol: TCP
+    port: {{ $value }}
+  {{- end }}
+
+{{- if .Values.eventListen.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.eventListen.service.loadBalancerIP }}
+{{- end }}
+{{- with .Values.eventListen.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+{{ toYaml . | indent 4 }}
+{{- end }}
+{{- if .Values.eventListen.service.extraPorts }}
+{{ toYaml .Values.eventListen.service.extraPorts | indent 2}}
+{{- end }}
+{{- end }}
+{{- end }}

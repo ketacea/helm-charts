@@ -1,0 +1,254 @@
+# 设置集群名称
+cluster: default
+
+enabled: true
+
+# 环境变量
+env:
+  ## 设置采集器注册时的 tags
+  KETAD_TAGS:
+  ## 设置采集器连接的 ketadb 地址
+  KETAD_ENDPOINTS:
+  ## 设置采集器连接使用的 token
+  KETAD_TOKEN:
+  ## 采集器使用的 cpu 数量
+  KETAD_MAX_PROCS: 1
+  ## 设置 ketad 的 pprof 地址, 不填写时不开启 pprof
+  KETAD_KETAD_PPROF:
+  ## 设置 keta-agent 的 pprof 地址, 不填写时不开启 pprof
+  KETAD_AGENT_PPROF:
+  ## 设置采集器独立运行(无需连接 ketadb)
+  KETAD_STANDALONE: false
+  ## 设置采集器使用的网卡信息, 默认无需设置, 自动选择网卡信息
+  KETAD_NET_INTERFACE:
+  ## ketad 日志级别, 支持 debug, info, warn, error, dpanic, panic, fatal
+  KETAD_KETAD_LOG_LEVEL: info
+  ## ketad 日志输出文件, stdout 代表往 stdout端输出, 默认为 ketad.log
+  KETAD_KETAD_LOG_FILE: stdout
+  ## ketad 日志最大大小，单位MB
+  KETAD_KETAD_LOG_MAX_SIZE: 100
+  ## ketad 日志最大保存数量
+  KETAD_KETAD_LOG_MAX_BACKUPS: 3
+  ## ketad 日志最大保存天数
+  KETAD_KETAD_LOG_MAX_AGE: 3
+  ## keta agent 日志级别, 支持 debug, info, warn, error, dpanic, panic, fatal
+  KETAD_AGENT_LOG_LEVEL: info
+  ## keta agent 日志输出文件, stdout 代表往 stdout端输出, 默认为 keta-agent.log
+  KETAD_AGENT_LOG_FILE:
+  ## keta agent 日志最大大小，单位MB
+  KETAD_AGENT_LOG_MAX_SIZE: 100
+  ## keta agent 日志最大保存数量
+  KETAD_AGENT_LOG_MAX_BACKUPS: 3
+  ## keta agent 日志最大保存天数
+  KETAD_AGENT_LOG_MAX_AGE: 3
+  ## ketad 配置文件路径, 默认无需设置
+  KETAD_KETAD_CONFIG_FILE:
+  ## keta agent 配置文件路径, 默认无需设置
+  KETAD_AGENT_CONFIG_FILE:
+
+image:
+  ## 采集器镜像仓库地址
+  repository: "ketaops/keta-agent"
+  ## 采集器镜像版本
+  tag: "latest"
+  ## 镜像的拉取策略(Kubernetes imagePullPolicy)
+  pullPolicy: Always
+
+# 覆盖 app 名称
+nameOverride: ""
+# 覆盖 app 名称
+fullnameOverride: ""
+
+# 添加控制账号
+serviceAccount:
+  ## 添加到服务帐户的注释
+  annotations: {}
+  ## 要使用的服务帐户的名称。如果未设置且 create 为真，则使用全名模板生成名称
+  name: ""
+
+# 支持使用Deployment部署和使用DaemonSet方式部署，另外指定为k8s-monitor时将同时部署DaemonSet和Deployment
+deployMethod: k8s-monitor
+
+# 指定部署 Deployment 集群 agent 数量
+replicaCount: 1
+
+imagePullSecrets: 
+  # - name: secret-name
+
+
+# Agent 集群 pod 的注释信息
+podAnnotations: {}
+#   key: "value"
+
+metaCache:
+  enabled: true  # 是否持久化meta文件，开启后，可指定meta信息存放路径和.agentid文件存放路径，启用此配置时需要将securityContext.runAsUser设置为0，否则将无权限写入host主机目录
+  mountPath: /home/ketad/agent-cache  # 容器内部meta文件以及.agentid所在目录
+  hostPath: /var/keta-agent  # 宿主机中meta文件挂载目录，实际目录: {{ .Values.metaCache.hostPath }}/{{ .Release.Namesapce }}/{{ .Release.Name }}
+
+
+# 资源限制
+resources:
+  limits:
+    cpu: "1"
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# 允许 DaemonSet 在选定的节点上进行调度
+# 参考: https://kubernetes.io/docs/user-guide/node-selection/
+nodeSelector: {}
+
+# 允许在污点节点上进行调度（需要 Kubernetes >= 1.6）
+tolerations: 
+- operator: "Exists"
+
+# 允许 DaemonSet 使用关联规则进行调度
+# 参考: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+affinity: {}
+
+# 是否采集k8s指标，使用DaemonSet部署时采集每个节点的kubelet指标，使用Deployment部署时采集k8s集群的指标
+kubernetesMetric:
+  enabled: true
+
+hostMetric:
+  enabled: true
+  env:
+    KETAD_HOST_PROC: /hostfs/proc
+    KETAD_HOST_SYS: /hostfs/sys
+    KETAD_HOST_ETC: /hostfs/etc
+    KETAD_HOST_VAR: /hostfs/var
+    KETAD_HOST_RUN: /hostfs/run
+    KETAD_HOST_DEV: /hostfs/dev
+  volumes:
+    - name: root-dir
+      hostPath:
+        path: /
+  volumeMounts:
+    - name: root-dir
+      mountPath: /hostfs
+      readOnly: true
+
+# 设置自动发现kubernetes功能, 仅在 DaemonSet 模式下生效
+discoveryKubernetes:
+  enabled: true
+  env:
+    # 设置 kubernetes 采集连接配置路径, 默认无需设置使用容器内 k8s 环境变量进行连接
+    #KETAD_DISCOVERY_KUBERNETES_KUBECONFIG: ".kube/config"
+    # 设置 kubernetes 采集节点名称限制
+    #KETAD_DISCOVERY_KUBERNETES_NODE_NAME: ""
+    # 设置 kubernetes 节点运行时环境, 支持 Docker, CRI-O, ContainerD, 默认会自动探测无需设置, 参数 "docker, crio, containerd"
+    #KETAD_DISCOVERY_KUBERNETES_CONTAINER_RUNTIME: ""
+    # 设置 kubernetes 节点运行时 socket 连接路径, 不填写默认会使用默认路径
+    # Docker 的默认路径为 "unix:///var/run/docker.sock"
+    # CRI-O 的默认路径为 "unix:///var/run/crio/crio.sock"
+    # ContainerD 的默认路径为 "unix:///var/run/containerd/containerd.sock"
+    #KETAD_DISCOVERY_KUBERNETES_RUNTIME_ENDPOINTS: ""
+    # 设置 kubernetes pod 日志存储路径前缀, 容器 stdout 日志路径相关
+    KETAD_DISCOVERY_KUBERNETES_POD_LOG_DIR_PREFIX: "/var/log/pods"
+    # 设置 kubernetes 主机 proc 映射路径前缀, 容器内日志路径相关
+    KETAD_DISCOVERY_KUBERNETES_PROC_DIR_PREFIX: "/hostfs/proc"
+    # 设置日志监听采集功能
+    KETAD_DISCOVERY_KUBERNETES_EVENTS_COLLECT_LOG_ENABLED: true
+  volumes:
+    # need map container's storage, e.g. host:/var/lib/docker to container:/var/lib/docker
+    - name: containerfs
+      hostPath:
+        path: /var/lib/docker
+    - name: pod-log-dir
+      hostPath:
+        path: /var/log/pods
+    - name: dockersocket
+      hostPath:
+        path: /var/run/docker.sock
+    - name: containerdsocket
+      hostPath:
+        path: /var/run/containerd/containerd.sock
+    - name: criosocket
+      hostPath:
+        path: /var/run/crio/crio.sock
+    - name: root-dir
+      hostPath:
+        path: /
+  volumeMounts:
+    # need map container's storage, e.g. host:/var/lib/docker to container:/var/lib/docker
+    - name: containerfs
+      mountPath: /var/lib/docker
+      readOnly: true
+    - name: pod-log-dir
+      mountPath: /var/log/pods
+      readOnly: true
+    - name: dockersocket
+      mountPath: /var/run/docker.sock
+      readOnly: true
+    - name: containerdsocket
+      mountPath: /var/run/containerd/containerd.sock
+      readOnly: true
+    - name: criosocket
+      mountPath: /var/run/crio/crio.sock
+      readOnly: true
+    - name: root-dir
+      mountPath: /hostfs
+      readOnly: true
+
+# 事件监听开关
+eventListen:
+  enabled: true
+  service:
+    labels: {}
+    type: ClusterIP
+    nodePort: ""
+    annotations: {}
+    ports:
+      collect: "10007"
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+    extraPorts: []
+
+  ingress:
+    enabled: false
+    annotations:
+      # nginx.ingress.kubernetes.io/proxy-body-size: "1024m"
+      kubernetes.io/ingress.class: nginx
+
+    path: /
+    hosts:
+      - example.com  
+
+# 指定是否使用宿主机网络, 为 true 时需同时指定 pandoraHeartBeat 参数为外部地址
+hostNetwork: true
+
+volumes:
+#   - name: varlibdockercontainers
+#     hostPath:
+#       path: /var/lib/docker/containers
+#       type: Directory
+#   - name: varlogs
+#     hostPath:
+#       path: /var/log
+#       type: Directory
+#   - name: apiservertestlog
+#     hostPath:
+#       path: /root/test-apiserver
+#       type: DirectoryOrCreate
+#   - name: docker-sock
+#     hostPath:
+#       path: /var/run/docker.sock
+
+volumeMounts:
+#   - name: varlibdockercontainers
+#     mountPath: /var/lib/docker/containers
+#     readOnly: true
+#   - name: varlogs
+#     mountPath: /var/log
+#     readOnly: true
+#   - name: apiservertestlog
+#     mountPath: /root/test-apiserver
+#     readOnly:  true
+#   - name: docker-sock
+#     mountPath: /var/run/docker.sock
+
+# 覆盖默认的 Agent 就绪探测设置
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 5

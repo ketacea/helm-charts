@@ -1,0 +1,168 @@
+{{- if .Values.enabled }}
+{{- if or (eq .Values.deployMethod "Deployment") (eq .Values.deployMethod "k8s-monitor") }}
+{{- $namespace := .Release.Namespace -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ketad.name" . | default .Release.Name }}
+  labels:
+    name: {{ include "ketad.name" . | default .Release.Name }}
+    app: {{ .Release.Name }}
+    {{- include "ketad.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: {{ .Release.Name | quote }}
+      release: {{ .Release.Name | quote }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        name: {{ .Release.Name | quote }}
+        release: {{ .Release.Name | quote }}
+    spec:
+      {{- if .Values.kubernetesMetric.enabled }}
+      serviceAccountName: {{ include "ketad.serviceAccountName" . }}
+      {{- end }}
+      {{- if eq .Values.deployMethod "k8s-monitor" }}
+      hostNetwork: false
+      {{- else }}
+      hostNetwork: {{ .Values.hostNetwork }}
+      {{- end }}
+      {{- if and .Values.hostNetwork (ne .Values.deployMethod "k8s-monitor")}}
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- end }}
+      imagePullSecrets:
+        {{- with .Values.imagePullSecrets }}
+        {{- toYaml . | nindent 8}}
+        {{- end }}
+
+      volumes:
+        
+        {{- if .Values.metaCache.enabled }}
+        - name: meta-path
+          hostPath:
+            path: {{ .Values.metaCache.hostPath }}/{{ $namespace }}/deployment/{{ .Release.Name }}
+        {{- end }}
+        {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8}}
+        {{- end }}
+        {{- if .Values.hostMetric.enabled }}
+        {{- with .Values.hostMetric.volumes }}
+        {{- toYaml . | nindent 8}}
+        {{- end }}
+        {{- end }}
+        
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- if and .Values.metaCache.enabled (or .Values.hostMetric.enabled) }}
+            runAsUser: 0
+            privileged: true
+            {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          readinessProbe:
+            exec:
+              command: 
+              - bash
+              - -c 
+              - | 
+                isalive=`ps -ef |grep keta-agent | grep -v grep|wc -l`
+                  if [[ $isalive -eq 0 ]];then
+                    exit 1
+                fi
+{{ toYaml .Values.readinessProbe | indent 12 }}
+          volumeMounts:
+            {{- if .Values.metaCache.enabled }}
+            - name: meta-path
+              mountPath: {{ .Values.metaCache.mountPath }}
+            {{- end }}
+            {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12}}
+            {{- end }}
+            {{- if .Values.hostMetric.enabled }}
+            {{- with .Values.hostMetric.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: KETAD_ENDPOINTS
+              value: {{ .Values.env.KETAD_ENDPOINTS | default (printf "%s:%s" .Release.Name "9400") }}
+            - name: KETAD_TOKEN
+              value: {{ .Values.env.KETAD_TOKEN | default "collect_b448ff35-0233-4655-9d6f-7e0e88efdd76" }}  # bootstrap Job init this token
+            {{- range $key, $value := .Values.env }}
+            {{- if and (ne $key "KETAD_TAGS") (ne $key "KETAD_ENDPOINTS") (ne $key "KETAD_TOKEN") }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            {{- end }}
+            - name: KETA_KUBERNETES_CLUSTER_NAME
+              value: "{{ .Values.cluster }}"
+            - name: KETAD_TAGS
+              value: "{{ .Values.env.KETAD_TAGS }} k8s::_deployment"
+            {{- if .Values.hostMetric.enabled }}
+            {{- range $key, $value := .Values.hostMetric.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            {{- end }}
+
+            {{- if .Values.kubernetesMetric.enabled }}
+            - name: KETA_KUBERNETES_CLUSTER_METRIC_ENABLE
+              value: "true"
+            - name: KETA_KUBERNETES_NODE_METRIC_ENABLE
+              value: "false"
+            - name: KETA_KUBERNETES_HOST_METRIC_ENABLE
+              value: "false"
+            {{- end }}
+
+            - name: KETA_KUBERNETES_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: KETA_KUBERNETES_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: KETA_KUBERNETES_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: KETA_KUBERNETES_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: KETA_KUBERNETES_POD_SERVICE_ACCOUNT
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.serviceAccountName
+            {{- if .Values.metaCache.enabled }}
+            - name: KETAD_META_PATH
+              value: {{ .Values.metaCache.mountPath }}/meta
+            - name: KETAD_ID_FILE
+              value: {{ .Values.metaCache.mountPath }}/.agentid
+            {{- end }}
+        
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
+{{- end }}

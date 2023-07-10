@@ -1,7 +1,7 @@
 PREFIX := ketadb
 TIMEOUT := 600s
 NAMESPACE := keta
-MYSQL_PASSWORD := password123
+MYSQL_PASSWORD := changeYourPassword
 MYSQL_RELEASE := mysql
 
 init:
@@ -9,10 +9,10 @@ init:
 	helm repo update keta-chart
 
 install: init
-	helm upgrade --create-namespace --install --wait --timeout=${TIMEOUT} -n ${NAMESPACE} ${MYSQL_RELEASE} keta-chart/mysql --set auth.rootPassword="${MYSQL_PASSWORD}"
-	helm upgrade --create-namespace --install --wait --timeout=${TIMEOUT} -n ${NAMESPACE} ${PREFIX}-master --values master.yaml ../../ --set mysql.password="${MYSQL_PASSWORD}" --set mysql.host=${MYSQL_RELEASE}
-	helm upgrade --create-namespace --install --wait --timeout=${TIMEOUT} -n ${NAMESPACE} ${PREFIX}-web --values web.yaml ../../ --set mysql.password="${MYSQL_PASSWORD}" --set mysql.host=${MYSQL_RELEASE}
-	helm upgrade --create-namespace --install --wait --timeout=${TIMEOUT} -n ${NAMESPACE} ${PREFIX}-data --values data.yaml ../../ --set mysql.password="${MYSQL_PASSWORD}" --set mysql.host=${MYSQL_RELEASE}
+	helm upgrade --create-namespace --install --wait --timeout=${TIMEOUT} -n ${NAMESPACE} ${MYSQL_RELEASE} keta-chart/mysql --set auth.createDatabase=true --set auth.database=ketadb --set auth.username=keta --set auth.password=${MYSQL_PASSWORD}
+	helm upgrade --create-namespace --install --wait --timeout=${TIMEOUT} -n ${NAMESPACE} ${PREFIX}-master --values master.yaml ../../ --set mysql.host=${MYSQL_RELEASE} --set mysql.password=${MYSQL_PASSWORD} --set mysql.user=keta --set mysql.database=ketadb
+	helm upgrade --create-namespace --install --wait --timeout=${TIMEOUT} -n ${NAMESPACE} ${PREFIX}-web --values web.yaml ../../ --set mysql.host=${MYSQL_RELEASE} --set mysql.password=${MYSQL_PASSWORD} --set mysql.user=keta --set mysql.database=ketadb
+	helm upgrade --create-namespace --install --wait --timeout=${TIMEOUT} -n ${NAMESPACE} ${PREFIX}-data --values data.yaml ../../ --set mysql.host=${MYSQL_RELEASE} --set mysql.password=${MYSQL_PASSWORD} --set mysql.user=keta --set mysql.database=ketadb
 
 uninstall:
 	helm del ${PREFIX}-data -n ${NAMESPACE}

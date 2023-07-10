@@ -1,7 +1,7 @@
-RELEASE := ketadb-default
+RELEASE := ketadb
 TIMEOUT := 600s
 NAMESPACE := keta
-MYSQL_PASSWORD := "password123"
+MYSQL_PASSWORD := "changeThisPassword"
 MYSQL_RELEASE := mysql
 
 init:
@@ -9,8 +9,8 @@ init:
 	helm repo update keta-chart
 
 install: init
-	helm upgrade --create-namespace --install --wait --timeout=${TIMEOUT} -n ${NAMESPACE} ${MYSQL_RELEASE} keta-chart/mysql --set auth.rootPassword=${MYSQL_PASSWORD} 
-	helm upgrade --create-namespace --install --wait --timeout=${TIMEOUT} -n ${NAMESPACE} ${RELEASE} ../../ --set mysql.password=${MYSQL_PASSWORD}
+	helm upgrade --create-namespace --install --wait --timeout=${TIMEOUT} -n ${NAMESPACE} ${MYSQL_RELEASE} keta-chart/mysql --set auth.createDatabase=true --set auth.database=ketadb --set auth.username=keta --set auth.password=${MYSQL_PASSWORD}
+	helm upgrade --create-namespace --install --wait --timeout=${TIMEOUT} -n ${NAMESPACE} ${RELEASE} ../../ --set mysql.host=${MYSQL_RELEASE} --set mysql.password=${MYSQL_PASSWORD} --set mysql.user=keta --set mysql.database=ketadb
 
 uninstall:
 	helm del ${RELEASE} -n ${NAMESPACE}

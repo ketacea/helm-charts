@@ -1,0 +1,55 @@
+{{- if .Values.enabled }}
+{{- if .Values.eventListen.ingress.enabled -}}
+{{- $fullName := printf "%s-%s" .Release.Namespace .Release.Name -}}
+{{- $namespace := .Release.Namespace -}}
+{{- $releaseName := .Release.Name -}}
+{{- $collectPort := .Values.eventListen.service.ports.collect -}}
+{{- $previewPort := .Values.eventListen.service.ports.preview -}}
+{{- $ingressPath := .Values.eventListen.ingress.path -}}
+{{- $apiIsStable := eq (include "ketad.ingress.isStable" .) "true" -}}
+{{- $ingressSupportsPathType := eq (include "ketad.ingress.supportsPathType" .) "true" -}}
+apiVersion: {{ template "ketad.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-ingress
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+{{- with .Values.eventListen.ingress.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.eventListen.ingress.tls }}
+  tls:
+  {{- range .Values.eventListen.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.eventListen.ingress.hosts }}
+    - host: {{ . }}
+      http:
+        paths:
+          - path: {{ $ingressPath }}
+            {{- if $ingressSupportsPathType }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- if $apiIsStable }}
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $collectPort }}
+              {{- else }}
+              serviceName: {{ $fullName }}
+              servicePort: {{ $collectPort }}
+              {{- end }}
+  {{- end }}
+{{- end }}
+{{- end }}

@@ -1,6 +1,6 @@
 # Docker for Mac
 
-This example deploy an ketadb 8.5.1 cluster composed of 3 different Helm releases:
+This example deploy an ketadb cluster composed of 3 different Helm releases:
 
 * ketadb-master for the 3 master nodes using [master values](./master.yaml)
 * ketadb-data for the 3 data nodes using [data values](./data.yaml)

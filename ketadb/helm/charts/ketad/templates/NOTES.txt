@@ -1,0 +1,5 @@
+{{- if .Values.enabled }}
+1. Get the application URL by running these commands:
+kubectl get pod -n {{ .Release.Namespace }} 
+kubectl exec -it [POD_NAME] --namespace {{ .Release.Namespace }} 
+{{- end }}
