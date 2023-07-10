@@ -18,3 +18,7 @@ uninstall:
 
 purge:
 	kubectl delete ns ${NAMESPACE}
+
+status:
+	helm list -n ${NAMESPACE}
+	kubectl get pod -n ${NAMESPACE}

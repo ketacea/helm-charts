@@ -68,3 +68,24 @@ spec:
   - name: transport
     port: {{ .Values.service.ports.transport }}
 {{- end }}
+
+{{- if .Values.ketaML.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.ketaML.service.name }}
+  labels:
+    {{- include "keta-ml.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.ketaML.service.type }}
+  ports:
+    {{- range $key,$value := .Values.ketaML.service.ports }}
+    - port: {{ $value }}
+      targetPort: {{ $value }}
+      protocol: TCP
+      name: {{ $key }}
+    {{- end }}
+  selector:
+    {{- include "keta-ml.selectorLabels" . | nindent 4 }}
+{{- end }}

@@ -1,0 +1,78 @@
+{{- if .Values.ketaML.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "keta-ml.name" . }}
+  labels:
+    {{- include "keta-ml.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.ketaML.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "keta-ml.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.ketaML.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "keta-ml.selectorLabels" . | nindent 8 }}
+    spec:
+      imagePullSecrets:
+        {{- with .Values.ketaML.imagePullSecrets }}
+        {{- toYaml . | nindent 8}}
+        {{- end }}
+      securityContext:
+        {{- toYaml .Values.ketaML.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ include "keta-ml.name" . }}
+          securityContext:
+            {{- toYaml .Values.ketaML.securityContext | nindent 12 }}
+          image: "{{ .Values.ketaML.image.repository }}:{{ .Values.ketaML.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.ketaML.image.pullPolicy }}
+          ports:
+            {{- range $key,$value := .Values.ketaML.service.ports }}
+            - name: {{ $key }}
+              containerPort: {{ $value }}
+              protocol: TCP
+            {{- end }}
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.ketaML.service.ports.frontend }}
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.ketaML.service.ports.frontend }}
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 3
+            successThreshold: 1
+            timeoutSeconds: 3
+          resources:
+            {{- toYaml .Values.ketaML.resources | nindent 12 }}
+          volumeMounts:
+            - name: ketaconfig
+              mountPath: /usr/share/keta/config/keta-ml.yml
+              subPath: keta-ml.yml
+      volumes:
+        - name: ketaconfig
+          configMap:
+            name: {{ .Release.Name }}-config
+      {{- with .Values.ketaML.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ketaML.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ketaML.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
