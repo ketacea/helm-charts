@@ -14,16 +14,33 @@
 
 ## 安装步骤
 1. 将此目录（docker-compose）放到部署目录下，例如：～/docker-compose
-2. 修改`.env`中`MYSQL_PASSWORD`参数值，为mysql数据库设置必要的密码（其它参数可以默认）
 3. 执行安装
     为了方便部署，我们在此目录下设定了一个Makefile，您可以使用`make install`来安装，与直接使用`docker-compose`不同的是，makefile中定义了一些检查逻辑，可以帮助您检查配置是否正确。
+
+    a. 修改配置
     ```bash
     cd ~/docker-compose
+    # 使用 `sed` 命令来修改 MySQL 密码
+    # 在 Linux 系统上修改 Mysql 密码
+    sed -i 's/MYSQL_PASSWORD=""/MYSQL_PASSWORD="ChangeThisPassword"/g' .env
+
+    # 在 Mac 系统上修改 Mysql 密码
+    sed -i '' 's/MYSQL_PASSWORD=""/MYSQL_PASSWORD="ChangeThisPassword"/g' .env
+    # 您也可以手动编辑`.env`文件，来修改 MySQL 密码和其它相关配置项
+    vim .env
+    ```
+    b. 开始安装
+    ```bash
     make install
-    # 检查安装结果
+    ```
+    c. 检查安装结果
+    ```
     make status
     # 查看日志
     make log ketadb
+    ```
+    d. 卸载/清理
+    ```bash
     # 停止服务
     make down
     # 清理产生的数据
@@ -82,3 +99,4 @@
 * ketadb以及keta-ml的配置均通过环境变量的形式注入，各配置参数参考[参数说明](*todo: ketadb以及ketaml参数说明*)
 * 当前部署方式为单机部署，仅限于测试验证使用，不推荐作为生产部署方式。生产部署请参考[k8s部署](../helm/Readme.zh.md)
 * 关于镜像仓库，可参考[docker hub](https://hub.docker.com/r/ketaops/ketadb)
+* 当前 keta-ml 无 arm64 的镜像，强制指定了 amd64 的系统平台，这个预期在 mac m1 芯片机器中是可以正常使用的。其它 arm 架构机器暂时无法部署 keta-ml，请自行去掉`docker-compose.yml`文件中`keta-ml`块.

@@ -1,7 +1,7 @@
 
 
 clusterName: "ketadb"
-replicas: 3
+replicas: 1
 
 roles:
   master: true
@@ -38,7 +38,6 @@ service:
     heartbeat: "9400"
     rpc: "9500"
     otlp: "4317"
-    debug: "9600"
   loadBalancerIP: ""
   loadBalancerSourceRanges: []
   extraPorts: []
