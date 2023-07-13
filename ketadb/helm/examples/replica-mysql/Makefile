@@ -16,9 +16,13 @@ uninstall:
 	helm del ${RELEASE} -n ${NAMESPACE}
 	helm del ${MYSQL_RELEASE} -n ${NAMESPACE}
 
+forward:
+	kubectl port-forward svc/${RELEASE} 9200 -n keta
+
 purge:
 	kubectl delete ns ${NAMESPACE}
 
 status:
 	helm list -n ${NAMESPACE}
+	@echo 
 	kubectl get pod -n ${NAMESPACE}

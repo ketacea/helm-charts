@@ -1,14 +1,22 @@
 ---
-replicas: 3
-image:
-  repository: docker.ketaops.cc/xishuhq/ketadb
-  tag: develop-24
-  
+replicas: 1
+
 roles:
   master: true
   web: true
   data: false
-  ingest: false
+  ingest: true
   
 persistence:
   enabled: false
+
+# 部署相关组件
+ketaML:
+  enabled: true
+
+bootstrap:
+  enabled: true
+
+ketad:
+  # keta-agent需要连接 data 节点，此处部署时不启动 agent，仅在 data 节点部署时启动
+  enabled: true

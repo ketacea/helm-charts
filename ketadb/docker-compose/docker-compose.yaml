@@ -66,7 +66,7 @@ services:
     environment:
       KETAML_LOG_LEVEN: INFO
       KETAML_LOG_DIR_NAME: "./log"
-      KETAML_LOG_FILE_NAME: "keta-ml/log"
+      KETAML_LOG_FILE_NAME: "keta-ml.log"
       KETAML_LOG_MAX_BYTES: "209715200"
       KETAML_LOG_BACKUP_COUNT: "5"
       KETAML_FLIGHT_HOST: "0.0.0.0"

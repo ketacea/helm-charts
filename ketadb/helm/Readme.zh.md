@@ -15,14 +15,14 @@ helm repo update keta-chart
 ### 安装mysql
 ```bash
 # 为了您的数据安全，请修改下面的密码
-helm install --create-namespace mysql keta-chart/mysql -n keta --set auth.createDatabase=true --set auth.database=ketadb --set auth.username=keta --set auth.password="changeThisPassword"
+helm install --create-namespace mysql keta-chart/mysql -n keta --set auth.createDatabase=true --set auth.database=ketadb --set auth.username=keta --set auth.password="changeThisPassword" --wait --timeout=5m
 ```
 
 ### 安装ketadb
 
 ```bash
 # 这里设置的mysql用户和密码与mysql的用户密码一致
-helm install --create-namespace ketadb keta-chart/ketadb -n keta --set mysql.host=mysql --set mysql.password="changeThisPassword" --set mysql.user=keta --set mysql.database=ketadb
+helm install --create-namespace ketadb keta-chart/ketadb -n keta --set mysql.host=mysql --set mysql.password="changeThisPassword" --set mysql.user=keta --set mysql.database=ketadb --wait --timeout=10m
 ```
 
 ### 查看部署状态和日志

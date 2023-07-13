@@ -13,14 +13,6 @@ spec:
   template:
     spec:
       restartPolicy: Never
-      {{- with .Values.bootstrap.tolerations }}
-      tolerations:
-{{ toYaml . | indent 6 }}
-      {{- end }}
-      {{- with .Values.bootstrap.nodeSelector }}
-      nodeSelector:
-{{ toYaml . | indent 8 }}
-      {{- end }}
       containers:
       - name: bootstrap
         image: "bitnami/mysql:8.0.33-debian-11-r17"

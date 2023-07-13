@@ -1,8 +1,6 @@
 ---
-replicas: 3
-image:
-  repository: docker.ketaops.cc/xishuhq/ketadb
-  tag: develop-24
+replicas: 1
+
 roles:
   master: false
   web: true
@@ -10,4 +8,15 @@ roles:
   ingest: true
 
 persistence:
+  enabled: false
+
+# master节点部署时已经部署过了，不需要重复部署
+ketaML:
+  enabled: false
+
+bootstrap:
+  enabled: false
+
+ketad:
+  # 是否部署ketad
   enabled: false

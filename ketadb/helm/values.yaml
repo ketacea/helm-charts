@@ -14,12 +14,9 @@ podManagementPolicy: Parallel
 updateStrategy: RollingUpdate
 
 image: 
-  repository: "docker.ketaops.cc/xishuhq/ketadb"
+  repository: "ketaops/ketadb"
   tag: "latest"
-  PullPolicy: "Always"
-
-
-
+  PullPolicy: "IfNotPresent"
 
 pod:
   labels: {} 
@@ -172,10 +169,6 @@ extraContainers: []
 
 bootstrap:
   enabled: true
-  user: keta
-  password: changeThisPassword
-
-
 
 ketad:
   # 是否部署ketad
@@ -228,11 +221,11 @@ ketad:
 
   image:
     ## 采集器镜像仓库地址
-    repository: "docker.ketaops.cc/xishuhq/keta-agent"
+    repository: "ketaops/keta-agent"
     ## 采集器镜像版本
-    tag: "develop-latest"
+    tag: "latest"
     ## 镜像的拉取策略(Kubernetes imagePullPolicy)
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
 
   # 覆盖 app 名称
   nameOverride: "ketad"
@@ -441,9 +434,9 @@ ketaML:
 
   image:
     repository: ketaops/keta-ml
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "t1.2.2"
+    tag: "latest"
   
   
 
@@ -482,4 +475,3 @@ ketaML:
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
-  

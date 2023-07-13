@@ -2,9 +2,9 @@
 
 This example deploy an ketadb cluster composed of 3 different Helm releases:
 
-* ketadb-master for the 3 master nodes using [master values](./master.yaml)
-* ketadb-data for the 3 data nodes using [data values](./data.yaml)
-* ketadb-web for the 3 client nodes using [web values](./web.yaml)
+* ketadb-master for the 1 master nodes using [master values](./master.yaml)
+* ketadb-data for the 1 data nodes using [data values](./data.yaml)
+* ketadb-web for the 1 client nodes using [web values](./web.yaml)
 
 
 ## Usage

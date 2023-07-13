@@ -9,6 +9,9 @@ init:
 install: init
 	helm upgrade --create-namespace --install --wait --timeout=${TIMEOUT} ${RELEASE} -n ${NAMESPACE} --values values.yaml ../../ 
 
+forward:
+	kubectl port-forward svc/${RELEASE} 9200 -n keta
+
 uninstall:
 	helm del ${RELEASE} -n ${NAMESPACE}
 
@@ -17,4 +20,5 @@ purge:
 
 status:
 	helm list -n ${NAMESPACE}
+	@echo 
 	kubectl get pod -n ${NAMESPACE}

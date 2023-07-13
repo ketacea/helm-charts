@@ -12,7 +12,7 @@ check-configure:
 init: 
 	docker-compose pull
 
-install: init check-configure
+install: check-configure
 	docker-compose up -d
 	docker-compose ps
 

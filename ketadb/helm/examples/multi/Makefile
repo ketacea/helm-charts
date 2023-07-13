@@ -1,5 +1,5 @@
 PREFIX := ketadb
-TIMEOUT := 600s
+TIMEOUT := 1200s
 NAMESPACE := keta
 MYSQL_PASSWORD := changeYourPassword
 MYSQL_RELEASE := mysql
@@ -20,9 +20,13 @@ uninstall:
 	helm del ${PREFIX}-master -n ${NAMESPACE}
 	helm del ${MYSQL_RELEASE} -n ${NAMESPACE}
 
+forward:
+	kubectl port-forward svc/${PREFIX}-web 9200 -n keta
+
 purge:
 	kubectl delete ns ${NAMESPACE}
 
 status:
 	helm list -n ${NAMESPACE}
+	@echo 
 	kubectl get pod -n ${NAMESPACE}

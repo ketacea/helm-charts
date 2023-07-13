@@ -1,11 +1,16 @@
 # 部署说明
 ## 前置条件
+
+### linux
 1. 安装 [docker](https://docs.docker.com/engine/install/)
 2. 安装 [docker-compose](https://docs.docker.com/compose/install/standalone/)
+
+### docker for mac/windows
+1. 安装 [docker-desktop](https://www.docker.com/products/docker-desktop/)
+
 ## 限制条件
-1. Linux amd64 的机器
-2. 具有外部网络访问权限（如没有，则需要使用离线镜像）
-3. 此方式仅支持单机部署（可单机多节点）
+1. 具有外部网络访问权限（如没有，则需要使用离线镜像）
+2. 此方式仅支持单机部署（可单机多节点）
 
 ## 安装步骤
 1. 将此目录（docker-compose）放到部署目录下，例如：～/docker-compose
@@ -53,15 +58,15 @@
     ```env
         
     # docker 仓库地址
-    REPOSITORY=docker.ketaops.cc
+    REPOSITORY=docker.io
 
     # docker 镜像地址
     KETADB_IMAGE_IMAGE=ketaops/ketadb
     KETA_ML_IMAGE_IMAGE=ketaops/ketadb
 
     # docker 镜像 tag
-    KETADB_IMAGE_TAG=v1.2.1.1
-    KETA_ML_IMAGE_TAG=v1.2.1.1
+    KETADB_IMAGE_TAG=latest
+    KETA_ML_IMAGE_TAG=latest
 
     # JVM OPTIONS
     JVM_OPTIONS="-Xmx2g -Xms2g"
@@ -76,3 +81,4 @@
 * `mysql`的配置中，默认为mysql的root用户生成了随机的密码，可使用命令`docker-compose logs  mysql |grep "GENERATED ROOT PASSWORD"`查看
 * ketadb以及keta-ml的配置均通过环境变量的形式注入，各配置参数参考[参数说明](*todo: ketadb以及ketaml参数说明*)
 * 当前部署方式为单机部署，仅限于测试验证使用，不推荐作为生产部署方式。生产部署请参考[k8s部署](../helm/Readme.zh.md)
+* 关于镜像仓库，可参考[docker hub](https://hub.docker.com/r/ketaops/ketadb)
