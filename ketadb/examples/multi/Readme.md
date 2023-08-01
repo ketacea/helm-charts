@@ -15,7 +15,7 @@ This example deploy an ketadb cluster composed of 3 different Helm releases:
 
   ```bash
   kubectl port-forward svc/ketadb-web 9200 -n keta
-  open localhost:9200
+  open http://localhost:9200
   ```
 
 * Clean up the environment and data.

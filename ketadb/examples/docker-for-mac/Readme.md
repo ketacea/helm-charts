@@ -15,7 +15,7 @@ for production.
 
   ```bash
   kubectl port-forward svc/ketadb-for-mac 9200 -n keta
-  open localhost:9200
+  open http://localhost:9200
   ```
 
 * Clean up the environment and data.

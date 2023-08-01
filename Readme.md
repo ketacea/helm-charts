@@ -24,6 +24,15 @@ helm install --create-namespace mysql keta-chart/mysql -n keta --set auth.create
 helm install --create-namespace ketadb keta-chart/ketadb -n keta --set mysql.host=mysql --set mysql.password="changeThisPassword" --set mysql.user=keta --set mysql.database=ketadb 
 ```
 
+You can now setup a port forward to query ketadb API:
+
+```bash
+kubectl port-forward svc/ketadb 9200 -n keta
+
+# visit for web
+open http://localhost:9200
+```
+
 ### Check Deployment Status and Logs
 ```bash
 kubectl get pod -n keta

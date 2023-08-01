@@ -14,7 +14,7 @@ This example will deploy MySQL in master-slave mode, as well as three ketadb nod
   kubectl port-forward svc/ketadb-default 9200 -n keta
 
   # visit for web
-  open localhost:9200
+  open http://localhost:9200
   ```
 
 * Clean up the environment and data.

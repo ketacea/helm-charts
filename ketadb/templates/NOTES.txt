@@ -3,4 +3,8 @@
 {{- if .Values.ingress.enabled }}
 2. view web app page.
   http://{{ .Values.ingress.hostsSuffix | first }}
+{{- else }}
+2. View web app page.
+  $ kubectl port-forward svc/{{ .Release.Name }} {{ .Values.service.ports.http |default "9200" }} -n {{ .Release.Namespace }}
+  $ open http://localhost:9200
 {{- end }}
