@@ -40,17 +40,17 @@ kubectl logs ketadb -n keta
 ```
 
 ## Usage Instructions
-* This chart includes several available configurations [examples](./examples/) for reference:
-    * [Default](./examples/default/Readme.md): Default deployment, starts 1 node with master, data, and web roles.
-    * [Docker For Mac](./examples/docker-for-mac/Readme.md): Testing scenario, starts 1 node using local database (h2) as the backend.
-    * [Multi-node](./examples/multi/Readme.md): Multi-node deployment, includes three roles (master, data, web) with one node each.
-    * [Replica-mysql](./examples/replica-mysql/Readme.md): MySQL high availability scenario, contains two MySQL nodes, and ketadb as the default scenario with one node.
+* This chart includes several available configurations [examples](./ketadb/examples/) for reference:
+    * [Default](./ketadb/examples/default/Readme.md): Default deployment, starts 1 node with master, data, and web roles.
+    * [Docker For Mac](./ketadb/examples/docker-for-mac/Readme.md): Testing scenario, starts 1 node using local database (h2) as the backend.
+    * [Multi-node](./ketadb/examples/multi/Readme.md): Multi-node deployment, includes three roles (master, data, web) with one node each.
+    * [Replica-mysql](./ketadb/examples/replica-mysql/Readme.md): MySQL high availability scenario, contains two MySQL nodes, and ketadb as the default scenario with one node.
     * *todo: More scenarios*
 * You may need to set reasonable resource configurations for your cluster:
     * JVM: `ketaJavaOptions`, modify this parameter to adjust the Java JVM memory size, defaults to `-Xmx1g -Xms1g`.
     * CPU and Memory: `resources`, adjust CPU and memory request and limit values, refer to [Data Volume vs. Resources]( *todo: Add data volume to resource recommendations*].
     * Storage: `volumeClaimTemplate`, estimate the approximate storage usage for your cluster, refer to [Data Volume vs. Resources]( *todo: Add data volume to resource recommendations*]. 
-* For production deployments, it's recommended to categorize node types. Currently, the supported types are `master`, `data`, and `web`. In the [example/multi](./examples/multi/) directory, you can find an example of how this works. It's important to note that the cluster can only include one release with the master role. Under the master role workload, you can deploy multiple Pods.
+* For production deployments, it's recommended to categorize node types. Currently, the supported types are `master`, `data`, and `web`. In the [example/multi](./ketadb/examples/multi/) directory, you can find an example of how this works. It's important to note that the cluster can only include one release with the master role. Under the master role workload, you can deploy multiple Pods.
 * About Node Role Explanation: *todo*
     * master:
     * data:

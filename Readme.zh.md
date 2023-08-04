@@ -41,17 +41,17 @@ kubectl logs ketadb -n keta
 ```
 
 ## 使用说明
-* 此chart包括几个可以使用的配置[示例](./examples/)作为参考
-    * [Default](./examples/default/Readme.md)  默认部署方式，将会启动1个节点，同时拥有master、data、web角色
-    * [Docker For Mac](./examples/docker-for-mac/Readme.md) 测试方案，将启动一个节点，后端数据库使用本地数据库（h2）
-    * [mutil](./examples/multi/Readme.md)  多节点部署方案，将包括三个角色(master、data、web)，每个角色1个节点
-    * [replica-mysql](./examples/replica-mysql/Readme.md)  mysql高可用方案，包含两个mysql节点，ketadb为默认方案（1个节点）
+* 此chart包括几个可以使用的配置[示例](./ketadb/examples/)作为参考
+    * [Default](./ketadb/examples/default/Readme.md)  默认部署方式，将会启动1个节点，同时拥有master、data、web角色
+    * [Docker For Mac](./ketadb/examples/docker-for-mac/Readme.md) 测试方案，将启动一个节点，后端数据库使用本地数据库（h2）
+    * [mutil](./ketadb/examples/multi/Readme.md)  多节点部署方案，将包括三个角色(master、data、web)，每个角色1个节点
+    * [replica-mysql](./ketadb/examples/replica-mysql/Readme.md)  mysql高可用方案，包含两个mysql节点，ketadb为默认方案（1个节点）
     * *todo: 更多场景*
 * 您可能需要为你的集群设置合理的资源配置
     * JVM: `ketaJavaOptions`，修改此参数调整java jvm内存大小，默认为`-Xmx1g -Xms1g`
     * CPU and Memory: `resources`, 调整cpu和内存的request以及limit，调整方式请参考[数据量与资源对应关系][ *todo: 补充数据量级推荐资源*]
     * Storage: `volumeClaimTemplate`，您需要预估您集群大致的存储用量，具体参考[数据量与资源对应关系][ *todo: 补充数据量级推荐资源*] 
-* 在生产部署时，建议对节点的类型做划分，当前支持`master`, `data`, `web`，在[example/multi](./examples/multi/)目录中有此示例，可以查看其如何工作的。值得说明的是，集群中只能包含一个master角色的release。在master角色的workload下，你可以部署多个Pod。
+* 在生产部署时，建议对节点的类型做划分，当前支持`master`, `data`, `web`，在[example/multi](./ketadb/examples/multi/)目录中有此示例，可以查看其如何工作的。值得说明的是，集群中只能包含一个master角色的release。在master角色的workload下，你可以部署多个Pod。
 * 关于节点角色说明：todo
     * master：
     * data：
